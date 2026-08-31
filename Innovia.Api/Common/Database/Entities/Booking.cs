@@ -7,5 +7,5 @@ public sealed class Booking
     public Guid ResourceId { get; set; }
     public DateTimeOffset StartsAt { get; set; }
     public DateTimeOffset EndsAt { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt {get; set;}
 }

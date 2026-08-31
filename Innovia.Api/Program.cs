@@ -31,6 +31,9 @@ builder.Services.AddBookingsFeature();
 
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapBookingsEndpoints();
 
 app.Run();

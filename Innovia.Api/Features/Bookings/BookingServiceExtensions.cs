@@ -9,4 +9,13 @@ public static class BookingServiceExtensions
 
         return services;
     }
+
+    public static IEndpointRouteBuilder MapBookingsEndpoints(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/bookings").WithTags("Bookings");
+
+        CreateBooking.Endpoint.Map(group);
+
+        return group;
+    }
 }

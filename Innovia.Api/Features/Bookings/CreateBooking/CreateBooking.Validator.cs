@@ -12,13 +12,13 @@ public sealed class Validator
         if (command.ResourceId == Guid.Empty)
             errors.Add(new ValidationError(nameof(command.ResourceId), "ResourceId is required"));
 
-        if (command.StartAt >= command.EndsAt)
-            errors.Add(new ValidationError(nameof(command.StartAt), "StartAt must be before EndsAt"));
+        if (command.StartsAt >= command.EndsAt)
+            errors.Add(new ValidationError(nameof(command.StartsAt), "StartAt must be before EndsAt"));
 
-        if (command.StartAt < DateTimeOffset.UtcNow)
-            errors.Add(new ValidationError(nameof(command.StartAt), "Cannot book a time in the past"));
+        if (command.StartsAt < DateTimeOffset.UtcNow)
+            errors.Add(new ValidationError(nameof(command.StartsAt), "Cannot book a time in the past"));
 
-        var duration = command.EndsAt - command.StartAt;
+        var duration = command.EndsAt - command.StartsAt;
         if (duration > TimeSpan.FromHours(8))
             errors.Add(new ValidationError(nameof(command.EndsAt), "Booking cannot exceed 8 hours"));
 

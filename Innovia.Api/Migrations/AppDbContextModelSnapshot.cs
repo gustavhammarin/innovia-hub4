@@ -120,17 +120,17 @@ namespace Innovia.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("EndTime")
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("EndsAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ResourceId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("StartTime")
+                    b.Property<DateTimeOffset>("StartsAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
