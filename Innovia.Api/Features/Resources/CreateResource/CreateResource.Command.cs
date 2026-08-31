@@ -1,2 +1,2 @@
-namespace Innovia.Api.Features.Resource.CreateResource;
+namespace Innovia.Api.Features.Resources.CreateResource;
 public sealed record Command(string Name, Guid ResourceId);

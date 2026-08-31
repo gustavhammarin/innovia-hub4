@@ -1,5 +1,7 @@
+using Innovia.Api.Common.Auth;
 using Innovia.Api.Common.Database;
 using Innovia.Api.Common.Database.Entities;
+using Innovia.Api.Features.Bookings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,9 +22,18 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+
+builder.Services.AddBookingsFeature();
 
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapBookingsEndpoints();
 
 app.Run();
