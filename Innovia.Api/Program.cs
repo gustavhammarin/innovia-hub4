@@ -1,3 +1,4 @@
+using Innovia.Api.Common.Auth;
 using Innovia.Api.Common.Database;
 using Innovia.Api.Common.Database.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +21,10 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 var app = builder.Build();
 
