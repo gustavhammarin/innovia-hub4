@@ -1,0 +1,1 @@
+namespace Innovia.Api.Common.Database.Entities;

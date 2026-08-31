@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: innovia_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: innovia_user
+      POSTGRES_PASSWORD: innovia_pass
+      POSTGRES_DB: innovia_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - innovia_pgdata:/var/lib/postgresql/data
+
+volumes:
+  innovia_pgdata:
