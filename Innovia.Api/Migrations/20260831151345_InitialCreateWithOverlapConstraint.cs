@@ -197,9 +197,9 @@ namespace Innovia.Api.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ResourceId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StartTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    EndTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false)
+                    StartsAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    EndsAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -277,14 +277,14 @@ namespace Innovia.Api.Migrations
                     ADD CONSTRAINT no_overlapping_bookings
                     EXCLUDE USING gist (
                         ""ResourceId"" WITH =,
-                        tstzrange(""StartTime"", ""EndTime"", '[)') WITH &&
+                        tstzrange(""StartsAt"", ""EndsAt"", '[)') WITH &&
                     );
                 ");
 
             migrationBuilder.Sql(@"
                     ALTER TABLE ""Bookings""
                     ADD CONSTRAINT start_before_end
-                    CHECK (""StartTime"" < ""EndTime"");
+                    CHECK (""StartsAt"" < ""EndsAt"");
                 ");
         }
 

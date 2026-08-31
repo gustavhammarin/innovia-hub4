@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Innovia.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260831112223_InitialCreateWithOverlapConstraint")]
+    [Migration("20260831151345_InitialCreateWithOverlapConstraint")]
     partial class InitialCreateWithOverlapConstraint
     {
         /// <inheritdoc />
@@ -123,17 +123,17 @@ namespace Innovia.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("EndTime")
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("EndsAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ResourceId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("StartTime")
+                    b.Property<DateTimeOffset>("StartsAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
