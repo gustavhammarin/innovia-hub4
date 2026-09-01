@@ -4,6 +4,7 @@ using Innovia.Api.Common.Database.Entities;
 using Innovia.Api.Features.Bookings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Innovia.Api.Features.Bookings.CancelBooking;
 
 var builder = WebApplication.CreateBuilder(args);
 
