@@ -8,6 +8,11 @@ public static class BookingServiceExtensions
         services.AddScoped<CreateBooking.Validator>();
         services.AddScoped<UpdateBooking.Handler>();
         services.AddScoped<UpdateBooking.Validator>();
+
+        services.AddScoped<GetBookingById.Handler>();
+        services.AddScoped<GetBookingById.Validator>();
+
+        services.AddScoped<ListAllBookings.Handler>();
         
         return services;
     }
@@ -18,6 +23,8 @@ public static class BookingServiceExtensions
 
         CreateBooking.Endpoint.Map(group);
         UpdateBooking.Endpoint.Map(group);
+        GetBookingById.Endpoint.Map(group);
+        ListAllBookings.Endpoint.Map(group);
 
         return group;
     }
