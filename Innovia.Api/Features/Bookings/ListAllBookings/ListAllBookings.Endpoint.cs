@@ -6,9 +6,9 @@ namespace Innovia.Api.Features.Bookings.ListAllBookings
 {
     public static class Endpoint
     {
-        public static void Map(IEndpointRouteBuilder app)
+        public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
         {
-            app.MapGet("/", async (
+            return app.MapGet("/", async (
                 Handler handler,
                 ICurrentUser currentUser,
                 CancellationToken ct) =>
@@ -17,8 +17,7 @@ namespace Innovia.Api.Features.Bookings.ListAllBookings
                 var command = new Command();
                 var result = await handler.HandleAsync(command, ct);
                 return result.ToHttpResponse();
-            })
-            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
+            });
         }
         
     }
