@@ -69,7 +69,8 @@ public sealed class Handler(AppDbContext dbContext)
             new ResourceRef(resource.Id, resource.Name),
             booking.StartsAt,
             booking.EndsAt,
-            booking.CreatedAt
+            booking.CreatedAt,
+            DateTime.Now
         ));
     }
 }

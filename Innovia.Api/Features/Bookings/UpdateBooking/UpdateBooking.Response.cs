@@ -8,5 +8,6 @@ public sealed record Response(
     ResourceRef Resource,
     DateTimeOffset StartsAt,
     DateTimeOffset EndsAt,
+    DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt
 );
