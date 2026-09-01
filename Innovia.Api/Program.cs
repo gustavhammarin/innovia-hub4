@@ -21,15 +21,14 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 .AddSignInManager()
 .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddAppAuthentication(builder.Configuration);
 
 builder.Services.AddBookingsFeature();
 
 var app = builder.Build();
+
+await app.ApplyMigrationsAsync();
+await app.SeedAppDataAsync();
 
 app.UseAuthentication();
 app.UseAuthorization();
