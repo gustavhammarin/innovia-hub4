@@ -23,6 +23,7 @@ public static class Endpoint
                 bookingId,
                 request.ResourceId,
                 currentUser.UserId.Value,
+                currentUser.IsAdmin,
                 request.StartsAt,
                 request.EndsAt
             );

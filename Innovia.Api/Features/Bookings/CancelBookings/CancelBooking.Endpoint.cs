@@ -19,7 +19,8 @@ public static class Endpoint
 
             var command = new Command(
                 bookingId,
-                currentUser.UserId.Value
+                currentUser.UserId.Value,
+                currentUser.IsAdmin
             );
 
             var validation = validator.Validate(command);
