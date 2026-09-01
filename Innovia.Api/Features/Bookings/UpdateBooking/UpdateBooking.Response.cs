@@ -1,6 +1,6 @@
 using Innovia.Api.Common.Contracts;
 
-namespace Innovia.Api.Features.Bookings.CreateBooking;
+namespace Innovia.Api.Features.Bookings.UpdateBooking;
 
 public sealed record Response(
     Guid Id,
@@ -8,8 +8,5 @@ public sealed record Response(
     ResourceRef Resource,
     DateTimeOffset StartsAt,
     DateTimeOffset EndsAt,
-    DateTimeOffset UpdatedAt
+    DateTimeOffset CreatedAt
 );
-
-
-

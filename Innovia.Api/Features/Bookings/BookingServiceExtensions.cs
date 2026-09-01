@@ -6,6 +6,8 @@ public static class BookingServiceExtensions
     {
         services.AddScoped<CreateBooking.Handler>();
         services.AddScoped<CreateBooking.Validator>();
+        services.AddScoped<UpdateBooking.Handler>();
+        services.AddScoped<UpdateBooking.Validator>();
         
         return services;
     }
@@ -15,6 +17,7 @@ public static class BookingServiceExtensions
         var group = app.MapGroup("/bookings").WithTags("Bookings");
 
         CreateBooking.Endpoint.Map(group);
+        UpdateBooking.Endpoint.Map(group);
 
         return group;
     }
