@@ -6,7 +6,7 @@ public static class BookingServiceExtensions
     {
         services.AddScoped<CreateBooking.Handler>();
         services.AddScoped<CreateBooking.Validator>();
-
+        
         return services;
     }
 
