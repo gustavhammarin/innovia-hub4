@@ -14,7 +14,7 @@ public sealed class Handler
         _context = context;
     }
 
-    public async Task<Result<Response>> HandleAsync (Command command, CancellationToken ct)
+    public async Task<Result<BookingResponse>> HandleAsync (Command command, CancellationToken ct)
     {
         var booking = await _context.Bookings
             .AsNoTracking()
@@ -31,9 +31,9 @@ public sealed class Handler
             .FirstAsync(u => u.Id == booking.UserId, ct);
 
         if (booking is null)
-            return Result<Response>.Fail(BookingErrors.NotFound); //lade till ett Booking Error
+            return Result<BookingResponse>.Fail(BookingErrors.NotFound); //lade till ett Booking Error
 
-        var resp = new Response(
+        var resp = new BookingResponse(
             booking.Id,
             new UserRef(user.Id, user.Email ?? "Unknown"),
             new ResourceRef (resource.Id, resource.Name),
@@ -42,7 +42,7 @@ public sealed class Handler
             booking.CreatedAt
         );
 
-        return Result<Response>.Ok(resp);
+        return Result<BookingResponse>.Ok(resp);
     }
     
 }
