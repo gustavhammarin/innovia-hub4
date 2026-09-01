@@ -14,4 +14,8 @@ public static class BookingErrors
     public static readonly Error NotFound = Error.NotFound(
         "Booking Not Found"
     );
+
+    public static readonly Error NotAuthorized = Error.Forbidden(
+        "You are not authorized to view this user's bookings"
+    );
 }
