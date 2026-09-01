@@ -31,6 +31,6 @@ public static class Endpoint
             
             var result = await handler.HandleAsync(command, ct);
             return result.ToHttpResponse();
-        });
+        }).RequireAuthorization(AuthorizationPolicies.MemberOnly);
     }
 }
