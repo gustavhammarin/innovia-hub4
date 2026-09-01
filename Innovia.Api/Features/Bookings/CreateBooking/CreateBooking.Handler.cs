@@ -45,7 +45,7 @@ public sealed class Handler
 
         var resource = await _context.Resources
             .AsNoTracking()
-            .Select(r => new {r.Id, r.Name})
+            .Select(r => new {r.Id, r.Name, r.Description})
             .FirstAsync(r => r.Id == booking.ResourceId, ct);
         
         var user = await _context.Users
@@ -57,7 +57,7 @@ public sealed class Handler
         (
             booking.Id,
             new UserRef(user.Id, user.Email ?? "Unknown"),
-            new ResourceRef(resource.Id, resource.Name),
+            new ResourceRef(resource.Id, resource.Name, resource.Description),
             booking.StartsAt,
             booking.EndsAt,
             booking.CreatedAt
