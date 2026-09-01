@@ -19,7 +19,7 @@ public sealed class Handler(AppDbContext dbContext)
             return Result<Response>.Fail(Error.NotFound("Booking was not found."));
         }
 
-        if (booking.UserId != command.UserId)
+        if (booking.UserId != command.UserId && !command.IsAdmin)
         {
             return Result<Response>.Fail(Error.Forbidden("You cannot update this booking."));
         }

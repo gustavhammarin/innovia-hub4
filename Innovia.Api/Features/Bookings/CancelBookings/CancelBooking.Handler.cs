@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Innovia.Api.Common.Errors;
 
 namespace Innovia.Api.Features.Bookings.CancelBooking;
+
 public class Handler
 {
     private readonly AppDbContext _dbContext;
@@ -21,9 +22,13 @@ public class Handler
             return Result<Response>.Fail(
                 Error.NotFound("Booking.NotFound"));
 
-        if (booking.UserId != command.UserId)
+        if (booking.UserId != command.UserId && !command.IsAdmin)
             return Result<Response>.Fail(
                 Error.Forbidden("You are not authorized to cancel this booking."));
+
+        if (booking.CancelledAt is not null)
+            return Result<Response>.Fail(
+                Error.Conflict("Booking is already cancelled."));
 
         booking.CancelledAt = DateTimeOffset.UtcNow;
 
@@ -33,6 +38,6 @@ public class Handler
             booking.Id,
             booking.CancelledAt
         ));
-     
+
     }
-}  
+}
