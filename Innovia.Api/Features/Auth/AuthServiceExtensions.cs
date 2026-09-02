@@ -1,4 +1,6 @@
-namespace Innovia.Api.Features.Auth.Login;
+using Innovia.Api.Features.Auth.Login;
+
+namespace Innovia.Api.Features.Auth;
 
 public static class AuthServiceExtensions
 {
