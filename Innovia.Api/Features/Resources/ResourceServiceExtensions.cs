@@ -24,6 +24,8 @@ public static class ResourceServiceExtensions
         UpdateResource.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
 
+        UpdateResource.Endpoint.Map(group);
+
         return group;
     }
 }

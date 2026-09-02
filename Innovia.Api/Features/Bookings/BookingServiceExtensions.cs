@@ -15,6 +15,9 @@ public static class BookingServiceExtensions
         services.AddScoped<GetBookingById.Validator>();
 
         services.AddScoped<ListAllBookings.Handler>();
+
+        services.AddScoped<ListBookingsByUserId.Handler>();
+        services.AddScoped<ListBookingsByUserId.Validator>();
         
         return services;
     }
