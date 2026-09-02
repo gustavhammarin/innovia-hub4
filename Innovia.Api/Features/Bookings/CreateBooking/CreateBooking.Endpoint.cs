@@ -15,12 +15,9 @@ public static class Endpoint
             CancellationToken ct
         ) =>
         {
-            if(currentUser.UserId is null)
-                return Results.Unauthorized();
-
             var command = new Command(
                 request.ResourceId,
-                currentUser.UserId.Value,
+                currentUser.UserId!.Value,
                 request.StartsAt,
                 request.EndsAt
             );

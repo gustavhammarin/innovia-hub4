@@ -14,6 +14,6 @@ public sealed class Validator
         if (string.IsNullOrWhiteSpace(cmd.Password))
             errors.Add(new ValidationError(nameof(cmd.Password), "Password is required"));
         
-        return errors.Count < 0 ? ValidationResult.Success() : ValidationResult.Fail(errors);
+        return errors.Count == 0 ? ValidationResult.Success() : ValidationResult.Fail(errors);
     } 
 }

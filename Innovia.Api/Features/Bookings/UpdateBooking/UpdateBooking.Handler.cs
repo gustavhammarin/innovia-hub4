@@ -24,18 +24,6 @@ public sealed class Handler(AppDbContext dbContext)
             return Result<Response>.Fail(Error.Forbidden("You cannot update this booking."));
         }
 
-        var hasOverlap = await dbContext.Bookings.AnyAsync(x =>
-            x.Id != command.BookingId &&
-            x.ResourceId == command.ResourceId &&
-            x.StartsAt < command.EndsAt &&
-            command.StartsAt < x.EndsAt,
-            ct);
-
-        if (hasOverlap)
-        {
-            return Result<Response>.Fail(Error.Conflict("Resource is already booked for this time."));
-        }
-
         booking.ResourceId = command.ResourceId;
         booking.StartsAt = command.StartsAt;
         booking.EndsAt = command.EndsAt;

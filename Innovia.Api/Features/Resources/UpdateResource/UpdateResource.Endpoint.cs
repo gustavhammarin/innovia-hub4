@@ -7,7 +7,7 @@ public static class Endpoint
 {
     public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
     {
-        return app.MapPut("/{id}:Guid", async (
+        return app.MapPut("/{id:guid}", async (
             Guid id, 
             Handler handler,
             Request request, 

@@ -8,6 +8,7 @@ public static class BookingServiceExtensions
     {
         services.AddScoped<CreateBooking.Handler>();
         services.AddScoped<CreateBooking.Validator>();
+
         services.AddScoped<UpdateBooking.Handler>();
         services.AddScoped<UpdateBooking.Validator>();
 
@@ -18,20 +19,31 @@ public static class BookingServiceExtensions
 
         services.AddScoped<ListBookingsByUserId.Handler>();
         services.AddScoped<ListBookingsByUserId.Validator>();
+
+        services.AddScoped<CancelBooking.Handler>();
+        services.AddScoped<CancelBooking.Validator>();
         
         return services;
     }
 
     public static IEndpointRouteBuilder MapBookingsEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/bookings").WithTags("Bookings");
+        var group = app.MapGroup("/bookings")
+            .WithTags("Bookings")
+            .AddEndpointFilter<RequireCurrentUserFilter>();
 
         CreateBooking.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOnly);
-        UpdateBooking.Endpoint.Map(group);
-        GetBookingById.Endpoint.Map(group);
+        UpdateBooking.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
+        GetBookingById.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
         ListAllBookings.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
+        ListBookingsByUserId.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
+        CancelBooking.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
 
         return group;
     }

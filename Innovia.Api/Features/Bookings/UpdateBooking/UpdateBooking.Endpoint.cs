@@ -5,9 +5,9 @@ namespace Innovia.Api.Features.Bookings.UpdateBooking;
 
 public static class Endpoint
 {
-    public static void Map(IEndpointRouteBuilder app)
+    public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
     {
-        app.MapPut("/{bookingId:guid}", async (
+        return app.MapPut("/{bookingId:guid}", async (
             Guid bookingId,
             Request request,
             Handler handler,
@@ -16,13 +16,10 @@ public static class Endpoint
             CancellationToken ct
         ) =>
         {
-            if (currentUser.UserId is null)
-                return Results.Unauthorized();
-
             var command = new Command(
                 bookingId,
                 request.ResourceId,
-                currentUser.UserId.Value,
+                currentUser.UserId!.Value,
                 currentUser.IsAdmin,
                 request.StartsAt,
                 request.EndsAt

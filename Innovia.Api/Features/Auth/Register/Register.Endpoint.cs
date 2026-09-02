@@ -1,19 +1,22 @@
 using Innovia.Api.Common.Auth.Cookie;
 using Innovia.Api.Common.Auth.Cookies;
+using Innovia.Api.Common.Auth.Jwt;
 using Innovia.Api.Common.Errors;
 using Innovia.Api.Common.Result;
+using Microsoft.Extensions.Options;
 
 namespace Innovia.Api.Features.Auth.Register;
 
 public static class Endpoint
 {
-    public static void Map(IEndpointRouteBuilder app)
+    public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
     {
-        app.MapPost("/register", async (
+        return app.MapPost("/register", async (
             Command cmd,
             HttpContext httpContext,
             Handler handler,
             Validator validator,
+            IOptions<JwtSettings> jwtSettings,
             CancellationToken ct
         ) =>
         {
@@ -30,11 +33,12 @@ public static class Endpoint
                 AuthCookieNames.AccessToken,
                 result.Value!,
                 CookieOptionsFactory.CreateAccessTokenCookieOptions(
-                    DateTimeOffset.UtcNow.AddMinutes(15)
+                    DateTimeOffset.UtcNow.AddMinutes(jwtSettings.Value.AccessTokenExpirationMinutes)
                 )
             );
 
             return Results.Ok();
-        });
+        })
+        .AllowAnonymous();
     }
 }

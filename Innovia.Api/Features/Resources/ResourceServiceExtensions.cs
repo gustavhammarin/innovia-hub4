@@ -17,14 +17,14 @@ public static class ResourceServiceExtensions
 
     public static IEndpointRouteBuilder MapResourcesEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/resources").WithTags("Resources");
+        var group = app.MapGroup("/resources")
+            .WithTags("Resources")
+            .AddEndpointFilter<RequireCurrentUserFilter>();
 
         CreateResource.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
         UpdateResource.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
-
-        UpdateResource.Endpoint.Map(group);
 
         return group;
     }
