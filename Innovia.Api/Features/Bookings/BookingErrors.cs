@@ -10,8 +10,4 @@ public static class BookingErrors
     public static Error InvalidReference() => Error.NotFound(
         "Invalid reference"
     );
-
-    public static readonly Error NotFound = Error.NotFound(
-        "Booking Not Found"
-    );
 }
