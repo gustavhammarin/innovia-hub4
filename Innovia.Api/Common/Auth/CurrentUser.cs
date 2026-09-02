@@ -21,5 +21,4 @@ public sealed class CurrentUser : ICurrentUser
     }
 
     public bool IsAuthenticated => _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
-    public bool IsAdmin => _httpContextAccessor.HttpContext?.User.IsInRole(Roles.Admin) ?? false;
 }
