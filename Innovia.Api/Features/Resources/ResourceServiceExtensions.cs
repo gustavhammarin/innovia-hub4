@@ -9,6 +9,9 @@ public static class ResourceServiceExtensions
         services.AddScoped<CreateResource.Handler>();
         services.AddScoped<CreateResource.Validator>();
 
+        services.AddScoped<UpdateResource.Handler>();
+        services.AddScoped<UpdateResource.Validator>();
+
         return services;
     }
 
@@ -18,6 +21,8 @@ public static class ResourceServiceExtensions
 
         CreateResource.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
+
+        UpdateResource.Endpoint.Map(group);
 
         return group;
     }
