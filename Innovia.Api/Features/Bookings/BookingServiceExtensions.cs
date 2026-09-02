@@ -1,3 +1,5 @@
+using Innovia.Api.Common.Auth;
+
 namespace Innovia.Api.Features.Bookings;
 
 public static class BookingServiceExtensions
@@ -24,11 +26,12 @@ public static class BookingServiceExtensions
     {
         var group = app.MapGroup("/bookings").WithTags("Bookings");
 
-        CreateBooking.Endpoint.Map(group);
+        CreateBooking.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.MemberOnly);
         UpdateBooking.Endpoint.Map(group);
         GetBookingById.Endpoint.Map(group);
-        ListAllBookings.Endpoint.Map(group);
-        ListBookingsByUserId.Endpoint.Map(group);
+        ListAllBookings.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
 
         return group;
     }
