@@ -33,7 +33,7 @@ namespace Innovia.Api.Features.Bookings.ListBookingsByUserId
             var resources = await _context.Resources
                 .AsNoTracking()
                 .Where(r => resourceIds.Contains(r.Id))
-                .Select(r => new {r.Id, r.Name})
+                .Select(r => new {r.Id, r.Name, r.Description})
                 .ToDictionaryAsync(r => r.Id, ct);
 
             var user = await _context.Users
@@ -44,7 +44,7 @@ namespace Innovia.Api.Features.Bookings.ListBookingsByUserId
             var responses = bookings.Select(b => new BookingResponse(
                 b.Id,
                 new UserRef(user.Id, user.Email ?? "Unknown"),
-                new ResourceRef(resources[b.ResourceId].Id, resources[b.ResourceId].Name),
+                new ResourceRef(resources[b.ResourceId].Id, resources[b.ResourceId].Name, resources[b.ResourceId].Description),
                 b.StartsAt,
                 b.EndsAt,
                 b.CreatedAt

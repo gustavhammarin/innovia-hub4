@@ -7,6 +7,7 @@ public static class AuthServiceExtensions
         var group = app.MapGroup("/auth").WithTags("Auth");
 
         Login.Endpoint.Map(group);
+        Logout.Endpoint.Map(group);
 
         return group;
     }
