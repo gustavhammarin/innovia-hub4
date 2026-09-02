@@ -1,3 +1,5 @@
+using Innovia.Api.Common.Database;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -5,6 +7,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Innovia.Api.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260901171700_AddResourceDescription")]
     public partial class AddResourceDescription : Migration
     {
         /// <inheritdoc />
