@@ -23,6 +23,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 .AddSignInManager()
 .AddDefaultTokenProviders();
 
+builder.Services.AddProblemDetails();
+
 builder.Services.AddAppAuthentication(builder.Configuration);
 
 builder.Services.AddAuthFeature();
@@ -34,6 +36,8 @@ var app = builder.Build();
 await app.ApplyMigrationsAsync();
 await app.SeedAppDataAsync();
 
+app.UseStatusCodePages();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -42,3 +46,5 @@ app.MapBookingsEndpoints();
 app.MapResourcesEndpoints();
 
 app.Run();
+
+public partial class Program { }
