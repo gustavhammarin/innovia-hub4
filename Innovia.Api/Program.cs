@@ -3,6 +3,7 @@ using Innovia.Api.Common.Database;
 using Innovia.Api.Common.Database.Entities;
 using Innovia.Api.Features.Bookings;
 using Innovia.Api.Features.Resources;
+using Innovia.Api.Features.ResourceTypes;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Innovia.Api.Common.Database.Entities;
@@ -32,6 +33,7 @@ builder.Services.AddAppAuthentication(builder.Configuration);
 
 builder.Services.AddBookingsFeature();
 builder.Services.AddResourcesFeature();
+builder.Services.AddResourceTypesFeature();
 
 var app = builder.Build();
 
@@ -43,6 +45,7 @@ app.UseAuthorization();
 
 app.MapBookingsEndpoints();
 app.MapResourcesEndpoints();
+app.MapResourceTypesEndpoints();
 
 app.Run();
 app.MapAuthEndpoints();
