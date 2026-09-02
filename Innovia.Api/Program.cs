@@ -5,6 +5,12 @@ using Innovia.Api.Features.Bookings;
 using Innovia.Api.Features.Resources;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Innovia.Api.Common.Database.Entities;
+using Innovia.Api.Features.Auth.Login;
+using Innovia.Api.Features.Bookings;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Innovia.Api.Features.Bookings.CancelBooking;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,5 +43,9 @@ app.UseAuthorization();
 
 app.MapBookingsEndpoints();
 app.MapResourcesEndpoints();
+
+app.Run();
+app.MapAuthEndpoints();
+app.MapBookingsEndpoints();
 
 app.Run();

@@ -1,13 +1,14 @@
 using Innovia.Api.Common.Auth;
 using Innovia.Api.Common.Result;
 
-namespace Innovia.Api.Features.Bookings.CreateBooking;
+namespace Innovia.Api.Features.Bookings.UpdateBooking;
 
 public static class Endpoint
 {
     public static void Map(IEndpointRouteBuilder app)
     {
-        app.MapPost("/", async (
+        app.MapPut("/{bookingId:guid}", async (
+            Guid bookingId,
             Request request,
             Handler handler,
             Validator validator,
@@ -15,12 +16,14 @@ public static class Endpoint
             CancellationToken ct
         ) =>
         {
-            if(currentUser.UserId is null)
+            if (currentUser.UserId is null)
                 return Results.Unauthorized();
 
             var command = new Command(
+                bookingId,
                 request.ResourceId,
                 currentUser.UserId.Value,
+                currentUser.IsAdmin,
                 request.StartsAt,
                 request.EndsAt
             );
@@ -28,9 +31,9 @@ public static class Endpoint
             var validation = validator.Validate(command);
             if (!validation.IsValid)
                 return validation.ToProblemResult();
-            
+
             var result = await handler.HandleAsync(command, ct);
             return result.ToHttpResponse();
-        }).RequireAuthorization(AuthorizationPolicies.MemberOnly);
+        });
     }
 }
