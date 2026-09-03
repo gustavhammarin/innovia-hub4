@@ -1,7 +1,8 @@
+using Innovia.Api.Common.Auth;
 using Innovia.Api.Common.Database.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace Innovia.Api.Common.Auth;
+namespace Innovia.Api.Common.Database.Seed;
 
 public class RoleSeeder
 {

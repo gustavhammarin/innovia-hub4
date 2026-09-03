@@ -11,5 +11,5 @@ public static class AuthErrors
         new("Email already exists", ErrorType.Conflict);
 
     public static Error RegistrationFailed(string message) =>
-        new(message, ErrorType.Failure);
+        new(message, ErrorType.Validation);
 }

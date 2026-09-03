@@ -1,6 +1,4 @@
-using Innovia.Api.Common.Database.Seed;
-
-namespace Innovia.Api.Common.Auth;
+namespace Innovia.Api.Common.Database.Seed;
 
 public static class SeedExtensions
 {
@@ -14,6 +12,12 @@ public static class SeedExtensions
 
         var adminSeeder = services.GetRequiredService<AdminUserSeeder>();
         await adminSeeder.SeedAsync();
+
+        var resourceTypeSeeder = services.GetRequiredService<ResourceTypeSeeder>();
+        await resourceTypeSeeder.SeedAsync();
+
+        var resourceSeeder = services.GetRequiredService<ResourceSeeder>();
+        await resourceSeeder.SeedAsync();
 
         var availabilityRuleSeeder = services.GetRequiredService<AvailabilityRuleSeeder>();
         await availabilityRuleSeeder.SeedAsync();

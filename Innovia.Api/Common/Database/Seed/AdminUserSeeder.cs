@@ -1,7 +1,8 @@
+using Innovia.Api.Common.Auth;
 using Innovia.Api.Common.Database.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace Innovia.Api.Common.Auth;
+namespace Innovia.Api.Common.Database.Seed;
 
 public class AdminUserSeeder
 {
@@ -21,7 +22,7 @@ public class AdminUserSeeder
 
         if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
             return;
-        
+
         var existingAdmin = await _userManager.FindByEmailAsync(adminEmail);
         if (existingAdmin is not null)
             return;
@@ -34,9 +35,12 @@ public class AdminUserSeeder
         };
 
         var result = await _userManager.CreateAsync(admin, adminPassword);
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            await _userManager.AddToRoleAsync(admin, Roles.Admin);
+            var message = string.Join(" ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Failed to seed admin user: {message}");
         }
+
+        await _userManager.AddToRoleAsync(admin, Roles.Admin);
     }
 }

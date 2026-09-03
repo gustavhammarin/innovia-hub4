@@ -59,15 +59,12 @@ public class LogoutTests : IAsyncLifetime
         var email = $"{Guid.NewGuid()}@test.com";
         await RegisterAsync(email, "Password123!");
 
-        await using var ctx = _dbFixture.CreateDbContext();
-        var userId = ctx.Users.Single(u => u.Email == email).Id;
-
-        var beforeLogout = await _client.GetAsync($"/bookings/user/{userId}");
+        var beforeLogout = await _client.GetAsync("/bookings/me");
         Assert.Equal(HttpStatusCode.OK, beforeLogout.StatusCode);
 
         await _client.PostAsync("/auth/logout", null);
 
-        var afterLogout = await _client.GetAsync($"/bookings/user/{userId}");
+        var afterLogout = await _client.GetAsync("/bookings/me");
         await afterLogout.AssertProblemDetailsAsync(HttpStatusCode.Unauthorized);
     }
 }
