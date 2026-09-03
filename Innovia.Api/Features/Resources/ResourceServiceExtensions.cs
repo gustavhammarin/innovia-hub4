@@ -12,6 +12,9 @@ public static class ResourceServiceExtensions
         services.AddScoped<UpdateResource.Handler>();
         services.AddScoped<UpdateResource.Validator>();
 
+        services.AddScoped<ListResources.Handler>();
+        services.AddScoped<ListResources.Validator>();
+
         return services;
     }
 
@@ -21,9 +24,16 @@ public static class ResourceServiceExtensions
 
         CreateResource.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
+            //bör vi ha kvar RequireAuthorization? Då skickas det void från
+           // CreateResource
 
         UpdateResource.Endpoint.Map(group);
 
-        return group;
+        ListResources.Endpoint.Map(group)
+            .WithName("ListResources")
+            .WithOpenApi();
+
+        return group; 
+     
     }
 }
