@@ -29,6 +29,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddAppAuthentication(builder.Configuration);
 
+builder.Services.AddAuthFeatures();
 builder.Services.AddBookingsFeature();
 builder.Services.AddResourcesFeature();
 builder.Services.AddResourceTypesFeature();

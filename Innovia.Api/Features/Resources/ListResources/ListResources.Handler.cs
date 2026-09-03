@@ -11,16 +11,17 @@ public sealed class Handler
     {
         _dbContext = dbContext;
     }
-    public async Task<Result<List<Response>>> HandleAsync (Query query, CancellationToken cancellationToken)
+    public async Task<Result<List<Response>>> HandleAsync(CancellationToken cancellationToken)
     {
         var resources = await _dbContext.Resources
             .AsNoTracking()
+            .OrderBy(resource => resource.Name)
             .Select(r => new Response(            
                 r.Id,
                 r.Name,
                 r.Description,
                 r.ResourceTypeId,
-                r.Capacity
+                r.CreatedAt
             ))
             .ToListAsync(cancellationToken);
 
