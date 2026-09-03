@@ -5,7 +5,7 @@ namespace Innovia.Api.Features.Resources;
 public static class ResourceErrors
 {
     public static readonly Error NotFound = Error.NotFound(
-        "Booking Not Found"
+        "Resource Not Found"
     );
 
     public static Error InvalidReference() => Error.NotFound(

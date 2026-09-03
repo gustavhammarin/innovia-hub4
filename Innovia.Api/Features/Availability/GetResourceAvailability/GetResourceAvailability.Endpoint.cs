@@ -1,20 +1,20 @@
-
 using Innovia.Api.Common.Result;
 
-namespace Innovia.Api.Features.Resources.UpdateResource;
+namespace Innovia.Api.Features.Availability.GetResourceAvailability;
 
 public static class Endpoint
 {
     public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
     {
-        return app.MapPut("/{id:guid}", async (
-            Guid id, 
+        return app.MapGet("/resources/{resourceId:guid}", async (
+            Guid resourceId,
+            DateOnly from,
+            DateOnly to,
             Handler handler,
-            Request request, 
-            Validator validator, 
+            Validator validator,
             CancellationToken ct) =>
         {
-            var command = new Command (id, request.Name, request.ResourceTypeId);
+            var command = new Command(resourceId, from, to);
 
             var validation = validator.Validate(command);
             if (!validation.IsValid)
@@ -22,8 +22,6 @@ public static class Endpoint
 
             var result = await handler.HandleAsync(command, ct);
             return result.ToHttpResponse();
-
         });
-
     }
 }
