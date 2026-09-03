@@ -80,11 +80,8 @@ public class LoginTests : IAsyncLifetime
     {
         var email = await RegisterUserAsync($"{Guid.NewGuid()}@test.com", "Password123!");
 
-        await using var ctx = _dbFixture.CreateDbContext();
-        var userId = ctx.Users.Single(u => u.Email == email).Id;
-
         await _client.PostAsJsonAsync("/auth/login", new { Email = email, Password = "Password123!" });
-        var response = await _client.GetAsync($"/bookings/user/{userId}");
+        var response = await _client.GetAsync("/bookings/me");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }

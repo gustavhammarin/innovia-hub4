@@ -72,10 +72,7 @@ public class RegisterTests : IAsyncLifetime
         var email = $"{Guid.NewGuid()}@test.com";
         await _client.PostAsJsonAsync("/auth/register", new { Email = email, Password = "Password123!" });
 
-        await using var ctx = _dbFixture.CreateDbContext();
-        var userId = (await ctx.Users.SingleAsync(u => u.Email == email)).Id;
-
-        var response = await _client.GetAsync($"/bookings/user/{userId}");
+        var response = await _client.GetAsync("/bookings/me");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -83,7 +80,7 @@ public class RegisterTests : IAsyncLifetime
     [Fact]
     public async Task Should_Return_ProblemDetails_When_Anonymous_Hits_Protected_Endpoint()
     {
-        var response = await _client.GetAsync($"/bookings/user/{Guid.NewGuid()}");
+        var response = await _client.GetAsync("/bookings/me");
 
         await response.AssertProblemDetailsAsync(HttpStatusCode.Unauthorized);
     }

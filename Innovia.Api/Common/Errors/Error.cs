@@ -10,8 +10,10 @@ public record Error(string Message, ErrorType Type)
         new(message, ErrorType.NotFound);
     public static Error Conflict(string message) => 
         new(message, ErrorType.Conflict);
-    public static Error Forbidden(string message) => 
+    public static Error Forbidden(string message) =>
         new(message, ErrorType.Forbidden);
+    public static Error Validation(string message) =>
+        new(message, ErrorType.Validation);
 }
 
 public enum ErrorType
@@ -20,6 +22,7 @@ public enum ErrorType
     NotFound,
     Conflict,
     Forbidden,
+    Validation,
 }
 
 public static class ErrorExtensions
@@ -45,6 +48,11 @@ public static class ErrorExtensions
             title: "Forbidden",
             detail: error.Message,
             statusCode: StatusCodes.Status403Forbidden
+        ),
+        ErrorType.Validation => Results.Problem(
+            title: "Bad Request",
+            detail: error.Message,
+            statusCode: StatusCodes.Status400BadRequest
         ),
         _ => throw new ArgumentOutOfRangeException(nameof(error.Type), "Unmapped ErrorType")
     };

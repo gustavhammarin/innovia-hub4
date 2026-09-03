@@ -15,10 +15,10 @@ public static class BookingServiceExtensions
         services.AddScoped<GetBookingById.Handler>();
         services.AddScoped<GetBookingById.Validator>();
 
-        services.AddScoped<ListAllBookings.Handler>();
+        services.AddScoped<GetMyBookings.Handler>();
 
-        services.AddScoped<ListBookingsByUserId.Handler>();
-        services.AddScoped<ListBookingsByUserId.Validator>();
+        services.AddScoped<ListBookings.Handler>();
+        services.AddScoped<ListBookings.Validator>();
 
         services.AddScoped<CancelBooking.Handler>();
         services.AddScoped<CancelBooking.Validator>();
@@ -38,10 +38,10 @@ public static class BookingServiceExtensions
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
         GetBookingById.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
-        ListAllBookings.Endpoint.Map(group)
-            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
-        ListBookingsByUserId.Endpoint.Map(group)
+        GetMyBookings.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
+        ListBookings.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
         CancelBooking.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
 
