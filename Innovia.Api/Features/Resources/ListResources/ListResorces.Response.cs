@@ -5,7 +5,7 @@ public sealed record Response(
     Guid Id,
     string Name,
     string Description,
-    string ResourceType,
+    Guid ResourceTypeId,
     int Capacity
 
 );
