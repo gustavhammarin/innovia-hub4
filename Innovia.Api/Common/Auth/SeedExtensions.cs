@@ -1,3 +1,5 @@
+using Innovia.Api.Common.Database.Seed;
+
 namespace Innovia.Api.Common.Auth;
 
 public static class SeedExtensions
@@ -11,6 +13,9 @@ public static class SeedExtensions
         await roleSeeder.SeedAsync();
 
         var adminSeeder = services.GetRequiredService<AdminUserSeeder>();
-        await adminSeeder.SeedAsync();   
+        await adminSeeder.SeedAsync();
+
+        var availabilityRuleSeeder = services.GetRequiredService<AvailabilityRuleSeeder>();
+        await availabilityRuleSeeder.SeedAsync();
     }
 }

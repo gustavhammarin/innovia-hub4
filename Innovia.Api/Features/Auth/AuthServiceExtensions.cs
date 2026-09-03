@@ -1,3 +1,5 @@
+using Innovia.Api.Features.Auth;
+
 namespace Innovia.Api.Features.Auth;
 
 public static class AuthServiceExtensions

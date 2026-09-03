@@ -33,7 +33,7 @@ namespace Innovia.Api.Features.Bookings.ListBookingsByUserId
             var resources = await _context.Resources
                 .AsNoTracking()
                 .Where(r => resourceIds.Contains(r.Id))
-                .Select(r => new {r.Id, r.Name, r.Description})
+                .Select(r => new { r.Id, r.Name, r.Description })
                 .ToDictionaryAsync(r => r.Id, ct);
 
             var user = await _context.Users
