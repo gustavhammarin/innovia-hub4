@@ -40,11 +40,12 @@ await app.SeedAppDataAsync();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+app.MapAuthEndpoints();
 app.MapBookingsEndpoints();
 app.MapResourcesEndpoints();
 app.MapResourceTypesEndpoints();
 app.MapAvailabilityEndpoints();
 
-app.MapAuthEndpoints();
 
 app.Run();

@@ -36,7 +36,8 @@ public class CreateBookingTests
             Id = Guid.CreateVersion7(),
             Name = "Meeting Room 1",
             CreatedAt = DateTimeOffset.UtcNow,
-            ResourceTypeId = resourceType.Id
+            ResourceTypeId = resourceType.Id,
+            Description = string.Empty
         };
 
         context.Users.Add(user);
