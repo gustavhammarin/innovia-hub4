@@ -114,6 +114,35 @@ namespace Innovia.Api.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Innovia.Api.Common.Database.Entities.AvailabilityRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeOnly>("ClosesAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeOnly>("OpensAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<Guid>("ResourceTypeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SlotDurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceTypeId", "DayOfWeek")
+                        .IsUnique();
+
+                    b.ToTable("AvailabilityRules");
+                });
+
             modelBuilder.Entity("Innovia.Api.Common.Database.Entities.Booking", b =>
                 {
                     b.Property<Guid>("Id")
@@ -293,6 +322,15 @@ namespace Innovia.Api.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Innovia.Api.Common.Database.Entities.AvailabilityRule", b =>
+                {
+                    b.HasOne("Innovia.Api.Common.Database.Entities.ResourceType", null)
+                        .WithMany()
+                        .HasForeignKey("ResourceTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Innovia.Api.Common.Database.Entities.Booking", b =>

@@ -5,9 +5,9 @@ namespace Innovia.Api.Features.Bookings.CreateBooking;
 
 public static class Endpoint
 {
-    public static void Map(IEndpointRouteBuilder app)
+    public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
     {
-        app.MapPost("/", async (
+        return app.MapPost("/", async (
             Request request,
             Handler handler,
             Validator validator,
@@ -31,6 +31,6 @@ public static class Endpoint
             
             var result = await handler.HandleAsync(command, ct);
             return result.ToHttpResponse();
-        }).RequireAuthorization(AuthorizationPolicies.MemberOnly);
+        });
     }
 }

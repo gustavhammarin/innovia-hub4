@@ -1,4 +1,5 @@
 using Innovia.Api.Common.Auth.Jwt;
+using Innovia.Api.Common.Database.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Innovia.Api.Common.Auth;
@@ -25,6 +26,7 @@ public static class AuthenticationExtensions
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<RoleSeeder>();
         services.AddScoped<AdminUserSeeder>();
+        services.AddScoped<AvailabilityRuleSeeder>();
 
         return services;
     }

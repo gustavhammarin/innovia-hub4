@@ -1,14 +1,13 @@
 
-using Innovia.Api.Common.Auth;
 using Innovia.Api.Common.Result;
 
 namespace Innovia.Api.Features.Resources.UpdateResource;
 
 public static class Endpoint
 {
-    public static void Map(IEndpointRouteBuilder app)
+    public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
     {
-        app.MapPut("/{id}:Guid", async (
+        return app.MapPut("/{id:guid}", async (
             Guid id, 
             Handler handler,
             Request request, 
@@ -23,9 +22,8 @@ public static class Endpoint
 
             var result = await handler.HandleAsync(command, ct);
             return result.ToHttpResponse();
-            
-        })
-        .RequireAuthorization(AuthorizationPolicies.AdminOnly);
-        
+
+        });
+
     }
 }
