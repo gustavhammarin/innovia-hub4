@@ -4,9 +4,9 @@ using Innovia.Api.Common.Result;
 namespace Innovia.Api.Features.Bookings.CancelBooking;
 public static class Endpoint
 {
-    public static void Map(IEndpointRouteBuilder app)
+    public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/{bookingId:guid}", async (
+        return app.MapDelete("/{bookingId:guid}", async (
             Guid bookingId,
             Handler handler,
             Validator validator,
@@ -14,12 +14,9 @@ public static class Endpoint
             CancellationToken ct
         ) =>
         {
-            if(currentUser.UserId is null)
-                return Results.Unauthorized();
-
             var command = new Command(
                 bookingId,
-                currentUser.UserId.Value,
+                currentUser.UserId!.Value,
                 currentUser.IsAdmin
             );
 

@@ -9,11 +9,11 @@ namespace Innovia.Api.Features.Bookings.ListBookingsByUserId
 {
     public static class Endpoint
     {
-        public static void Map(IEndpointRouteBuilder app)
+        public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
         {
-            app.MapGet("/user/{userId:guid}", async (
-                Guid userId, 
-                Handler handler, 
+            return app.MapGet("/user/{userId:guid}", async (
+                Guid userId,
+                Handler handler,
                 Validator validator,
                 ICurrentUser currentuser,
                 CancellationToken ct
@@ -27,8 +27,7 @@ namespace Innovia.Api.Features.Bookings.ListBookingsByUserId
 
                     var result = await handler.HandleAsync(command,ct);
                     return result.ToHttpResponse();
-            })
-            .RequireAuthorization();
+            });
         }
     }
 }

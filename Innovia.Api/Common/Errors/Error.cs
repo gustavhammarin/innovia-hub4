@@ -27,22 +27,22 @@ public static class ErrorExtensions
     public static IResult ToProblemResult(this Error error) => error.Type switch
     {
         ErrorType.Failure => Results.Problem(
-            title: "",
+            title: "Internal Server Error",
             detail: error.Message,
             statusCode: StatusCodes.Status500InternalServerError
         ),
         ErrorType.NotFound => Results.Problem(
-            title: "",
+            title: "Not Found",
             detail: error.Message,
             statusCode: StatusCodes.Status404NotFound
         ),
         ErrorType.Conflict => Results.Problem(
-            title: "",
+            title: "Conflict",
             detail: error.Message,
             statusCode: StatusCodes.Status409Conflict
         ),
         ErrorType.Forbidden => Results.Problem(
-            title: "",
+            title: "Forbidden",
             detail: error.Message,
             statusCode: StatusCodes.Status403Forbidden
         ),
