@@ -12,6 +12,9 @@ public static class ResourceServiceExtensions
         services.AddScoped<UpdateResource.Handler>();
         services.AddScoped<UpdateResource.Validator>();
 
+        services.AddScoped<ListResources.Handler>();
+        services.AddScoped<ListResources.Validator>();
+      
         services.AddScoped<GetResourceById.Handler>();
         services.AddScoped<GetResourceById.Validator>();
 
@@ -28,6 +31,11 @@ public static class ResourceServiceExtensions
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
         GetResourceById.Endpoint.Map(group);
 
-        return group;
+        ListResources.Endpoint.Map(group)
+            .WithName("ListResources")
+            .WithOpenApi();
+
+        return group; 
+     
     }
 }
