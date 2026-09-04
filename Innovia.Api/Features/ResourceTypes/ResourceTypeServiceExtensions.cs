@@ -9,6 +9,9 @@ public static class ResourceTypeServiceExtensions
         services.AddScoped<CreateResourceType.Handler>();
         services.AddScoped<CreateResourceType.Validator>();
 
+        services.AddScoped<UpdateResourceType.Handler>();
+        services.AddScoped<UpdateResourceType.Validator>();
+
         services.AddScoped<ListResourceTypes.Handler>();
 
         return services;
@@ -19,6 +22,8 @@ public static class ResourceTypeServiceExtensions
         var group = app.MapGroup("/resource-types").WithTags("ResourceTypes");
 
         CreateResourceType.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
+        UpdateResourceType.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
         ListResourceTypes.Endpoint.Map(group);
 

@@ -35,7 +35,9 @@ public sealed class ResourceTypeSeeder
             {
                 Id = Guid.CreateVersion7(),
                 Name = name,
-                CreatedAt = DateTimeOffset.UtcNow
+                CreatedAt = DateTimeOffset.UtcNow,
+                MaxDurationMinutes = 480,
+                MaxAdvanceDays = 90
             })
             .ToList();
 

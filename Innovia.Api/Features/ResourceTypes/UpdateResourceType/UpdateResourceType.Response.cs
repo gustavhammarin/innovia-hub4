@@ -1,9 +1,8 @@
-namespace Innovia.Api.Features.ResourceTypes.CreateResourceType;
+namespace Innovia.Api.Features.ResourceTypes.UpdateResourceType;
 
 public sealed record Response(
     Guid Id,
     string Name,
-    DateTimeOffset CreatedAt,
     int MaxDurationMinutes,
     int MaxAdvanceDays
 );
