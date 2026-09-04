@@ -29,6 +29,12 @@ public class AppDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, G
             r.HasOne<ResourceType>().WithMany().HasForeignKey(x => x.ResourceTypeId);
         });
 
+        builder.Entity<ResourceType>(rt =>
+        {
+            rt.Property(x => x.MaxDurationMinutes).HasDefaultValue(480);
+            rt.Property(x => x.MaxAdvanceDays).HasDefaultValue(90);
+        });
+
         builder.Entity<AvailabilityRule>(a =>
         {
             a.HasKey(x => x.Id);

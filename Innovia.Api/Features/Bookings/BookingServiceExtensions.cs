@@ -6,6 +6,8 @@ public static class BookingServiceExtensions
 {
     public static IServiceCollection AddBookingsFeature(this IServiceCollection services)
     {
+        services.AddScoped<BookingRulesService>();
+
         services.AddScoped<CreateBooking.Handler>();
         services.AddScoped<CreateBooking.Validator>();
 

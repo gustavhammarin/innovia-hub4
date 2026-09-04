@@ -21,7 +21,9 @@ public sealed class Handler
             .Select(resourceType => new Response(
                 resourceType.Id,
                 resourceType.Name,
-                resourceType.CreatedAt))
+                resourceType.CreatedAt,
+                resourceType.MaxDurationMinutes,
+                resourceType.MaxAdvanceDays))
             .ToListAsync(ct);
 
         return Result<List<Response>>.Ok(resourceTypes);

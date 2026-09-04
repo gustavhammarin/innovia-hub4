@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Innovia.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260902170505_FixOverlapConstraintExcludeCancelled")]
-    partial class FixOverlapConstraintExcludeCancelled
+    [Migration("20260904110353_AddResourceTypeBookingRules")]
+    partial class AddResourceTypeBookingRules
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -214,6 +214,16 @@ namespace Innovia.Api.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MaxAdvanceDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(90);
+
+                    b.Property<int>("MaxDurationMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(480);
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -10,14 +10,20 @@ namespace Innovia.Api.Features.Bookings.CreateBooking;
 public sealed class Handler
 {
     private readonly AppDbContext _context;
+    private readonly BookingRulesService _bookingRulesService;
 
-    public Handler(AppDbContext context)
+    public Handler(AppDbContext context, BookingRulesService bookingRulesService)
     {
         _context = context;
+        _bookingRulesService = bookingRulesService;
     }
 
     public async Task<Result<Response>> HandleAsync(Command cmd, CancellationToken ct)
     {
+        var ruleViolationError = await _bookingRulesService.ValidateAsync(cmd.ResourceId, cmd.StartsAt, cmd.EndsAt, ct);
+        if (ruleViolationError is not null)
+            return Result<Response>.Fail(ruleViolationError);
+            
         var booking = new Booking
         {
             Id = Guid.CreateVersion7(),
