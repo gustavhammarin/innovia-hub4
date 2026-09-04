@@ -12,6 +12,7 @@ public class AppDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, G
     public DbSet<Resource> Resources => Set<Resource>();
     public DbSet<ResourceType> ResourceTypes => Set<ResourceType>();
     public DbSet<AvailabilityRule> AvailabilityRules => Set<AvailabilityRule>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -42,6 +43,13 @@ public class AppDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, G
             a.HasIndex(x => new { x.ResourceTypeId, x.DayOfWeek }).IsUnique();
             a.Property(x => x.OpensAt).HasColumnType("time without time zone");
             a.Property(x => x.ClosesAt).HasColumnType("time without time zone");
+        });
+
+        builder.Entity<RefreshToken>(rt =>
+        {
+            rt.HasKey(x => x.Id);
+            rt.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.UserId);
+            rt.HasIndex(x => x.TokenHash).IsUnique();
         });
     }
 }

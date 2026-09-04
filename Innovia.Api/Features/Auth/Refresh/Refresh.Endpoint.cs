@@ -2,33 +2,30 @@ using Innovia.Api.Common.Auth.Cookie;
 using Innovia.Api.Common.Auth.Cookies;
 using Innovia.Api.Common.Auth.Jwt;
 using Innovia.Api.Common.Errors;
-using Innovia.Api.Common.Result;
 using Microsoft.Extensions.Options;
 
-namespace Innovia.Api.Features.Auth.Login;
+namespace Innovia.Api.Features.Auth.Refresh;
 
 public static class Endpoint
 {
     public static RouteHandlerBuilder Map(IEndpointRouteBuilder app)
     {
-        return app.MapPost("/login", async (
-            Command cmd,
+        return app.MapPost("/refresh", async (
             HttpContext httpContext,
             Handler handler,
-            Validator validator,
             IOptions<JwtSettings> jwtSettings,
             CancellationToken ct
         ) =>
         {
-            var validation = validator.Validate(cmd);
-            if (!validation.IsValid)
-                return validation.ToProblemResult();
-
-            var result = await handler.HandleAsync(cmd, ct);
+            var rawToken = httpContext.Request.Cookies[AuthCookieNames.RefreshToken];
+            if (string.IsNullOrEmpty(rawToken))
+                return AuthErrors.InvalidCredentials().ToProblemResult();
+            
+            var result = await handler.HandleAsync(new Command(rawToken), ct);
 
             if (!result.IsSuccess)
                 return result.Error!.ToProblemResult();
-
+            
             httpContext.Response.Cookies.Append(
                 AuthCookieNames.AccessToken,
                 result.Value!.AccessToken,
@@ -36,7 +33,6 @@ public static class Endpoint
                     DateTimeOffset.UtcNow.AddMinutes(jwtSettings.Value.AccessTokenExpirationMinutes)
                 )
             );
-
             httpContext.Response.Cookies.Append(
                 AuthCookieNames.RefreshToken,
                 result.Value!.RefreshToken,
@@ -46,7 +42,6 @@ public static class Endpoint
             );
 
             return Results.Ok();
-        })
-        .AllowAnonymous();
+        }).AllowAnonymous();
     }
 }

@@ -45,6 +45,7 @@ public class LoginTests : IAsyncLifetime
 
         Assert.True(response.StatusCode == HttpStatusCode.OK, $"Status {response.StatusCode}: {body}");
         Assert.Contains(response.Headers, h => h.Key == "Set-Cookie" && h.Value.Any(v => v.Contains(AuthCookieNames.AccessToken)));
+        Assert.Contains(response.Headers, h => h.Key == "Set-Cookie" && h.Value.Any(v => v.Contains(AuthCookieNames.RefreshToken)));
     }
 
     [Fact]

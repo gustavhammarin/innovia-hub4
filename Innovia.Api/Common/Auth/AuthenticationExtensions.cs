@@ -1,4 +1,5 @@
 using Innovia.Api.Common.Auth.Jwt;
+using Innovia.Api.Common.Auth.RefreshTokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 
@@ -27,6 +28,7 @@ public static class AuthenticationExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
         return services;
     }

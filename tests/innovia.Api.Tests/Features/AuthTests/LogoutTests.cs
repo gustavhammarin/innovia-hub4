@@ -46,11 +46,32 @@ public class LogoutTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_Return_ProblemDetails_When_Not_Authenticated()
+    public async Task Should_Return_Ok_When_Not_Authenticated()
     {
         var response = await _client.PostAsync("/auth/logout", null);
 
-        await response.AssertProblemDetailsAsync(HttpStatusCode.Unauthorized);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Should_Revoke_Refresh_Token_In_Database_On_Logout()
+    {
+        var email = $"{Guid.NewGuid()}@test.com";
+        await RegisterAsync(email, "Password123!");
+
+        var login = await _client.PostAsJsonAsync("/auth/login", new { Email = email, Password = "Password123!" });
+        var refreshToken = login.Headers.GetValues("Set-Cookie")
+            .First(v => v.StartsWith($"{AuthCookieNames.RefreshToken}="))
+            .Split(';')[0][(AuthCookieNames.RefreshToken.Length + 1)..];
+
+        await _client.PostAsync("/auth/logout", null);
+
+        using var rawClient = _factory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "/auth/refresh");
+        request.Headers.Add("Cookie", $"{AuthCookieNames.RefreshToken}={refreshToken}");
+        var response = await rawClient.SendAsync(request);
+
+        await response.AssertProblemDetailsAsync(HttpStatusCode.Forbidden);
     }
 
     [Fact]
