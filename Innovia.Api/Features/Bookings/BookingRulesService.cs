@@ -1,4 +1,5 @@
 using Innovia.Api.Common.Database;
+using Innovia.Api.Common.Database.Entities;
 using Innovia.Api.Common.Errors;
 using Innovia.Api.Common.Time;
 using Microsoft.EntityFrameworkCore;
@@ -27,18 +28,22 @@ public sealed class BookingRulesService
         var data = await _context.Resources
             .AsNoTracking()
             .Where(r => r.Id == resourceId)
-            .Join(_context.ResourceTypes, r => r.ResourceTypeId, rt => rt.Id, (r, rt) => rt)
-            .Select(rt => new
+            .Join(_context.ResourceTypes, r => r.ResourceTypeId, rt => rt.Id, (r, rt) => new { Resource = r, ResourceType = rt })
+            .Select(data => new
             {
-                ResourceType = rt,
+                data.Resource,
+                data.ResourceType,
                 Rule = _context.AvailabilityRules
-                    .Where(ar => ar.ResourceTypeId == rt.Id && ar.DayOfWeek == dayOfWeek)
+                    .Where(ar => ar.ResourceTypeId == data.ResourceType.Id && ar.DayOfWeek == dayOfWeek)
                     .FirstOrDefault()
             })
             .FirstOrDefaultAsync(ct);
 
         if (data is null)
             return null;
+
+        if (data.Resource.Status != ResourceStatus.Online)
+            return BookingErrors.ResourceUnavailable(data.Resource.Status);
 
         var resourceType = data.ResourceType;
 

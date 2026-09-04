@@ -1,4 +1,5 @@
 using Innovia.Api.Common.Errors;
+using Innovia.Api.Common.Database.Entities;
 
 namespace Innovia.Api.Features.Bookings;
 
@@ -38,5 +39,13 @@ public static class BookingErrors
 
     public static Error OutsideAvailability() => Error.Validation(
         "This resource is not available for booking at the selected time"
+    );
+
+    public static Error ResourceUnavailable(ResourceStatus status) => Error.Conflict(
+        $"This resource is not available for booking because its status is '{status}'."
+    );
+
+    public static readonly Error AlreadyCancelled = Error.Conflict(
+        "Booking is already cancelled."
     );
 }

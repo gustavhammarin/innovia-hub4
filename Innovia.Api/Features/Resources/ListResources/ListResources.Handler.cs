@@ -1,4 +1,5 @@
 using Innovia.Api.Common.Database;
+using Innovia.Api.Common.Database.Entities;
 using Innovia.Api.Common.Result;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,13 +16,15 @@ public sealed class Handler
     {
         var resources = await _dbContext.Resources
             .AsNoTracking()
+            .Where(resource => resource.Status != ResourceStatus.Archived)
             .OrderBy(resource => resource.Name)
             .Select(r => new Response(            
                 r.Id,
                 r.Name,
                 r.Description,
                 r.ResourceTypeId,
-                r.CreatedAt
+                r.CreatedAt,
+                r.Status
             ))
             .ToListAsync(cancellationToken);
 

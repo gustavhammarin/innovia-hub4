@@ -1,5 +1,6 @@
 using Innovia.Api.Common.Database;
 using Innovia.Api.Common.Result;
+using Innovia.Api.Common.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Innovia.Api.Features.Resources.UpdateResource;
@@ -20,8 +21,12 @@ public sealed class Handler
 
         if (resource is null)
             return Result<Response>.Fail(ResourceErrors.NotFound); 
+
+        if (resource.Status == ResourceStatus.Archived)
+            return Result<Response>.Fail(ResourceErrors.ArchivedCannotBeUpdated);
         
-        resource.Name = command.Name;
+        resource.Name = command.Name.Trim();
+        resource.Description = command.Description.Trim();
         resource.ResourceTypeId = command.ResourceTypeId;
 
         try
@@ -33,7 +38,12 @@ public sealed class Handler
             return Result<Response>.Fail(ResourceErrors.InvalidReference());
         }
 
-        var response = new Response(resource.Id, resource.Name, resource.ResourceTypeId);
+        var response = new Response(
+            resource.Id,
+            resource.Name,
+            resource.Description,
+            resource.ResourceTypeId,
+            resource.Status);
 
         return Result<Response>.Ok(response);
     }

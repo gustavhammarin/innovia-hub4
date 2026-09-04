@@ -7,4 +7,5 @@ public sealed class Resource
     public required string Description { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public Guid ResourceTypeId { get; set; }
+    public ResourceStatus Status { get; set; } = ResourceStatus.Online;
 }
