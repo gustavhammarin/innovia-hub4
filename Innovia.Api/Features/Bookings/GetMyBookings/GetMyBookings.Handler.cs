@@ -43,7 +43,8 @@ public sealed class Handler
             new ResourceRef(resources[b.ResourceId].Id, resources[b.ResourceId].Name, resources[b.ResourceId].Description),
             b.StartsAt,
             b.EndsAt,
-            b.CreatedAt
+            b.CreatedAt,
+            b.CancelledAt
         )).ToList();
 
         return Result<List<BookingResponse>>.Ok(responses);

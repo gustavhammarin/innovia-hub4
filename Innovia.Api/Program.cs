@@ -11,8 +11,14 @@ using Innovia.Api.Features.ResourceTypes;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -43,6 +49,15 @@ builder.Services.AddOpenApi(options =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+        policy.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
+
 builder.Services.AddAppAuthentication(builder.Configuration);
 builder.Services.AddSeeders();
 
@@ -64,6 +79,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseStatusCodePages();
+
+app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
