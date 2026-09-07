@@ -69,6 +69,7 @@ public sealed class Handler
             .ToListAsync(ct);
 
         var slots = slotCandidates
+            .Where(slot => slot.StartUtc > DateTimeOffset.UtcNow)
             .Select(slot => new SlotResponse(
                 slot.StartUtc,
                 slot.EndUtc,
