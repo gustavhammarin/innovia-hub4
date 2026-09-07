@@ -9,4 +9,12 @@ public static class CookieOptionsFactory
         SameSite = SameSiteMode.Strict,
         Expires = expires
     };
+    public static CookieOptions CreateRefreshTokenCookieOptions(DateTimeOffset expires) => new()
+    {
+        HttpOnly = true,
+        Secure = true,
+        SameSite = SameSiteMode.Strict,
+        Expires = expires,
+        Path = "/auth"
+    };
 }
