@@ -1,9 +1,8 @@
 using Innovia.Api.Common.Database;
-using Innovia.Api.Common.Database.Entities;
 using Innovia.Api.Common.Result;
 using Microsoft.EntityFrameworkCore;
 
-namespace Innovia.Api.Features.Resources.GetResourceById;
+namespace Innovia.Api.Features.Resources.GetResourceByIdAdmin;
 
 public sealed class Handler
 {
@@ -18,14 +17,15 @@ public sealed class Handler
     {
         var resource = await _context.Resources
             .AsNoTracking()
-            .Where(r => r.Id == command.Id && r.Status != ResourceStatus.Archived)
-            .Select(r => new Response(
-                r.Id,
-                r.Name,
-                r.Description,
-                r.ResourceTypeId,
-                r.CreatedAt,
-                r.Status))
+            .Where(resource => resource.Id == command.Id)
+            .Select(resource => new Response(
+                resource.Id,
+                resource.Name,
+                resource.Description,
+                resource.ResourceTypeId,
+                resource.CreatedAt,
+                resource.Status
+            ))
             .FirstOrDefaultAsync(ct);
 
         return resource is null

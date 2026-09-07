@@ -1,7 +1,7 @@
 using Innovia.Api.Common.Database;
 using Innovia.Api.Common.Database.Entities;
-using Innovia.Api.Common.Errors;
 using Innovia.Api.Common.Result;
+using Innovia.Api.Features.ResourceTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Innovia.Api.Features.Resources.CreateResource;
@@ -21,7 +21,7 @@ public sealed class Handler
             .AnyAsync(resourceType => resourceType.Id == command.ResourceTypeId, ct);
 
         if (!resourceTypeExists)
-            return Result<Response>.Fail(Error.NotFound("Resource type was not found."));
+            return Result<Response>.Fail(ResourceTypeErrors.NotFound);
 
         var resource = new Resource
         {
@@ -40,7 +40,8 @@ public sealed class Handler
             resource.Name,
             resource.Description,
             resource.ResourceTypeId,
-            resource.CreatedAt
+            resource.CreatedAt,
+            resource.Status
         ));
     }
 }

@@ -1,3 +1,5 @@
+using Innovia.Api.Common.Database.Entities;
+
 namespace Innovia.Api.Features.Resources.CreateResource;
 
 public sealed record Response(
@@ -5,5 +7,6 @@ public sealed record Response(
     string Name,
     string Description,
     Guid ResourceTypeId,
-    DateTimeOffset CreatedAt
+    DateTimeOffset CreatedAt,
+    ResourceStatus Status
 );
