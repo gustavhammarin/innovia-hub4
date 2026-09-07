@@ -42,7 +42,8 @@ public sealed class Handler
             new ResourceRef (resource.Id, resource.Name, resource.Description),
             booking.StartsAt,
             booking.EndsAt,
-            booking.CreatedAt
+            booking.CreatedAt,
+            booking.CancelledAt
         );
 
         return Result<BookingResponse>.Ok(resp);

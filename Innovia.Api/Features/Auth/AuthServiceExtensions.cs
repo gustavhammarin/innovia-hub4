@@ -22,6 +22,7 @@ public static class AuthServiceExtensions
         Logout.Endpoint.Map(group);
         Register.Endpoint.Map(group);
         Refresh.Endpoint.Map(group);
+        Me.Endpoint.Map(group);
 
         return group;
     }
