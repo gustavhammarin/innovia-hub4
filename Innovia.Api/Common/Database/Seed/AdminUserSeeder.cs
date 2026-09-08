@@ -31,7 +31,9 @@ public class AdminUserSeeder
         {
             UserName = adminEmail,
             Email = adminEmail,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            FirstName = "Admin",
+            LastName = "Admin"
         };
 
         var result = await _userManager.CreateAsync(admin, adminPassword);

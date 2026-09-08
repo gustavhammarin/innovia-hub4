@@ -21,7 +21,9 @@ public class CreateBookingTests
         {
             Id = Guid.CreateVersion7(),
             UserName = $"{Guid.NewGuid()}@test.com",
-            Email = $"{Guid.NewGuid()}@test.com"
+            Email = $"{Guid.NewGuid()}@test.com",
+            FirstName = "Test",
+            LastName = "User"
         };
 
         var resourceType = new ResourceType
@@ -62,8 +64,15 @@ public class CreateBookingTests
         return (user.Id, resource.Id);
     }
 
+    private sealed class NoopBookingNotifier : IBookingNotifier
+    {
+        public Task BookingCreatedAsync(Guid resourceId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task BookingCancelledAsync(Guid resourceId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task BookingUpdatedAsync(Guid oldResourceId, Guid newResourceId, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
     private static Handler CreateHandler(AppDbContext context) =>
-        new(context, new BookingRulesService(context));
+        new(context, new BookingRulesService(context), new NoopBookingNotifier());
 
     [Fact]
     public async Task Should_Succeed_When_Booking_Valid_Time_On_Resource()
@@ -147,7 +156,9 @@ public class CreateBookingTests
         {
             Id = Guid.CreateVersion7(),
             UserName = $"{Guid.NewGuid()}@test.com",
-            Email = $"{Guid.NewGuid()}@test.com"
+            Email = $"{Guid.NewGuid()}@test.com",
+            FirstName = "Test",
+            LastName = "User"
         };
         context.Users.Add(user);
         await context.SaveChangesAsync();

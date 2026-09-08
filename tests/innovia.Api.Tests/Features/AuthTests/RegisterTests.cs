@@ -32,7 +32,7 @@ public class RegisterTests : IAsyncLifetime
     {
         var email = $"{Guid.NewGuid()}@test.com";
 
-        var response = await _client.PostAsJsonAsync("/auth/register", new { Email = email, Password = "Password123!" });
+        var response = await _client.PostAsJsonAsync("/auth/register", new { FirstName = "Test", LastName = "User", Email = email, Password = "Password123!" });
         var body = await response.Content.ReadAsStringAsync();
 
         Assert.True(response.StatusCode == HttpStatusCode.OK, $"Status {response.StatusCode}: {body}");
@@ -48,20 +48,22 @@ public class RegisterTests : IAsyncLifetime
     public async Task Should_Fail_With_Conflict_When_Email_Already_Registered()
     {
         var email = $"{Guid.NewGuid()}@test.com";
-        await _client.PostAsJsonAsync("/auth/register", new { Email = email, Password = "Password123!" });
+        await _client.PostAsJsonAsync("/auth/register", new { FirstName = "Test", LastName = "User", Email = email, Password = "Password123!" });
 
-        var second = await _client.PostAsJsonAsync("/auth/register", new { Email = email, Password = "Password123!" });
+        var second = await _client.PostAsJsonAsync("/auth/register", new { FirstName = "Test", LastName = "User", Email = email, Password = "Password123!" });
 
         await second.AssertProblemDetailsAsync(HttpStatusCode.Conflict);
     }
 
     [Theory]
-    [InlineData("", "Password123!")]
-    [InlineData("not-an-email", "Password123!")]
-    [InlineData("a@b.com", "short")]
-    public async Task Should_Return_BadRequest_On_Invalid_Input(string email, string password)
+    [InlineData("Test", "User", "", "Password123!")]
+    [InlineData("Test", "User", "not-an-email", "Password123!")]
+    [InlineData("Test", "User", "a@b.com", "short")]
+    [InlineData("", "User", "a@b.com", "Password123!")]
+    [InlineData("Test", "", "a@b.com", "Password123!")]
+    public async Task Should_Return_BadRequest_On_Invalid_Input(string firstName, string lastName, string email, string password)
     {
-        var response = await _client.PostAsJsonAsync("/auth/register", new { Email = email, Password = password });
+        var response = await _client.PostAsJsonAsync("/auth/register", new { FirstName = firstName, LastName = lastName, Email = email, Password = password });
 
         await response.AssertProblemDetailsAsync(HttpStatusCode.BadRequest);
     }
@@ -70,7 +72,7 @@ public class RegisterTests : IAsyncLifetime
     public async Task Should_Allow_Access_To_Own_Bookings_With_Cookie_Set_After_Register()
     {
         var email = $"{Guid.NewGuid()}@test.com";
-        await _client.PostAsJsonAsync("/auth/register", new { Email = email, Password = "Password123!" });
+        await _client.PostAsJsonAsync("/auth/register", new { FirstName = "Test", LastName = "User", Email = email, Password = "Password123!" });
 
         var response = await _client.GetAsync("/bookings/me");
 
