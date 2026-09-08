@@ -29,7 +29,7 @@ public class LoginTests : IAsyncLifetime
     private async Task<string> RegisterUserAsync(string email, string password)
     {
         using var registerClient = _factory.CreateAuthClient();
-        var response = await registerClient.PostAsJsonAsync("/auth/register", new { Email = email, Password = password });
+        var response = await registerClient.PostAsJsonAsync("/auth/register", new { FirstName = "Test", LastName = "User", Email = email, Password = password });
         var body = await response.Content.ReadAsStringAsync();
         Assert.True(response.StatusCode == HttpStatusCode.OK, $"Register failed: {response.StatusCode}: {body}");
         return email;
@@ -71,7 +71,7 @@ public class LoginTests : IAsyncLifetime
     [InlineData("a@b.com", "")]
     public async Task Should_Return_BadRequest_On_Invalid_Input(string email, string password)
     {
-        var response = await _client.PostAsJsonAsync("/auth/login", new { Email = email, Password = password });
+        var response = await _client.PostAsJsonAsync("/auth/login", new { FirstName = "Test", LastName = "User", Email = email, Password = password });
 
         await response.AssertProblemDetailsAsync(HttpStatusCode.BadRequest);
     }

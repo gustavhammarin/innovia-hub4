@@ -26,7 +26,9 @@ public sealed class Handler
         var user = new ApplicationUser
         {
             UserName = cmd.Email,
-            Email = cmd.Email
+            Email = cmd.Email,
+            FirstName = cmd.FirstName.Trim(),
+            LastName = cmd.LastName.Trim()
         };
 
         var createResult = await _userManager.CreateAsync(user, cmd.Password);

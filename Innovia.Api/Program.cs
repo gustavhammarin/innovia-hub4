@@ -9,6 +9,7 @@ using Innovia.Api.Features.Bookings;
 using Innovia.Api.Features.Realtime;
 using Innovia.Api.Features.Resources;
 using Innovia.Api.Features.ResourceTypes;
+using Innovia.Api.Features.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -70,6 +71,7 @@ builder.Services.AddBookingsFeature();
 builder.Services.AddResourcesFeature();
 builder.Services.AddResourceTypesFeature();
 builder.Services.AddAvailabilityFeature();
+builder.Services.AddUsersFeature();
 
 var app = builder.Build();
 
@@ -96,6 +98,7 @@ app.MapBookingsEndpoints();
 app.MapResourcesEndpoints();
 app.MapResourceTypesEndpoints();
 app.MapAvailabilityEndpoints();
+app.MapUsersEndpoints();
 
 
 app.Run();

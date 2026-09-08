@@ -42,7 +42,9 @@ public class ResourceStatusTests
         {
             Id = Guid.CreateVersion7(),
             UserName = $"{unique}@test.com",
-            Email = $"{unique}@test.com"
+            Email = $"{unique}@test.com",
+            FirstName = "Test",
+            LastName = "User"
         };
 
         var resourceType = new ResourceType
