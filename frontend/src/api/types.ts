@@ -60,3 +60,24 @@ export interface AvailabilityResponse {
   resourceId: string;
   slots: AvailabilitySlot[];
 }
+
+export type CurrentOccupancy = {
+  totalPercentage: number;
+  byResourceType: {
+    resourceTypeId: string;
+    name: string;
+    bookedCount: number;
+    totalCount: number;
+  }[];
+};
+
+export type RangeOccupancy = {
+  totalPercentage: number;
+  byResourceType: {
+    resourceTypeId: string;
+    name: string;
+    bookedHours: number;
+    availableHours: number;
+    percentage: number;
+  }[];
+};

@@ -6,6 +6,7 @@ using Innovia.Api.Common.OpenApi;
 using Innovia.Api.Features.Auth;
 using Innovia.Api.Features.Availability;
 using Innovia.Api.Features.Bookings;
+using Innovia.Api.Features.Occupancy;
 using Innovia.Api.Features.Realtime;
 using Innovia.Api.Features.Resources;
 using Innovia.Api.Features.ResourceTypes;
@@ -71,6 +72,7 @@ builder.Services.AddBookingsFeature();
 builder.Services.AddResourcesFeature();
 builder.Services.AddResourceTypesFeature();
 builder.Services.AddAvailabilityFeature();
+builder.Services.AddOccupancyFeature();
 builder.Services.AddUsersFeature();
 
 var app = builder.Build();
@@ -99,6 +101,7 @@ app.MapBookingsEndpoints();
 app.MapResourcesEndpoints();
 app.MapResourceTypesEndpoints();
 app.MapAvailabilityEndpoints();
+app.MapOccupancyEndpoints();
 app.MapUsersEndpoints();
 
 

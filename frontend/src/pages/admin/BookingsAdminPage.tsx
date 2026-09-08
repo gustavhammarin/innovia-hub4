@@ -7,6 +7,7 @@ import { useCancelBooking } from "../../hooks/useBookingMutations";
 import { sortByStartDescending } from "../../lib/bookingGrouping";
 import { formatDateTime } from "../../lib/date";
 import { useAdminBookingUpdates } from "../../hooks/useAdminBookingsUpdates";
+import { OccupancyWidget } from "./OccupancyWidget";
 
 export function BookingsAdminPage() {
   useAdminBookingUpdates();
@@ -38,6 +39,8 @@ export function BookingsAdminPage() {
       <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
         Alla bokningar
       </h1>
+
+      <OccupancyWidget from={from} to={to} />
 
       <div className="flex gap-4 mb-4 items-end">
         <div>
