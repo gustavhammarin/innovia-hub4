@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ApiError } from "../../api/client";
+import type { Booking } from "../../api/types";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { useAllBookings } from "../../hooks/useBookings";
 import { useCancelBooking } from "../../hooks/useBookingMutations";
 import { sortByStartDescending } from "../../lib/bookingGrouping";
@@ -9,13 +11,16 @@ export function BookingsAdminPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
 
   const bookingsQuery = useAllBookings({ from: from || undefined, to: to || undefined });
   const cancelMutation = useCancelBooking();
 
-  function cancel(id: string) {
+  function confirmCancel() {
+    if (!cancelTarget) return;
     setError(null);
-    cancelMutation.mutate(id, {
+    cancelMutation.mutate(cancelTarget.id, {
+      onSuccess: () => setCancelTarget(null),
       onError: (err) => setError(err instanceof ApiError ? err.message : "Kunde inte avboka"),
     });
   }
@@ -62,7 +67,6 @@ export function BookingsAdminPage() {
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {bookingsQuery.isLoading && <p className="text-gray-500">Laddar...</p>}
 
       <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
@@ -96,9 +100,8 @@ export function BookingsAdminPage() {
                 <td className="px-4 py-3 text-right">
                   {!b.cancelledAt && (
                     <button
-                      onClick={() => cancel(b.id)}
-                      disabled={cancelMutation.isPending}
-                      className="text-red-600 hover:text-red-500 font-medium disabled:opacity-50"
+                      onClick={() => setCancelTarget(b)}
+                      className="text-red-600 hover:text-red-500 font-medium"
                     >
                       Avboka
                     </button>
@@ -112,6 +115,33 @@ export function BookingsAdminPage() {
           <p className="text-sm text-gray-500 px-4 py-6">Inga bokningar hittades.</p>
         )}
       </div>
+
+      {cancelTarget && (
+        <ConfirmDialog
+          title="Avboka?"
+          confirmLabel="Avboka"
+          cancelLabel="Behåll bokningen"
+          danger
+          isPending={cancelMutation.isPending}
+          error={error}
+          onConfirm={confirmCancel}
+          onClose={() => {
+            setCancelTarget(null);
+            setError(null);
+          }}
+        >
+          <p>
+            <span className="font-medium text-gray-900 dark:text-gray-100">
+              {cancelTarget.resource.name}
+            </span>
+            <br />
+            {cancelTarget.user.email}
+            <br />
+            {formatDateTime(cancelTarget.startsAt)} – {formatDateTime(cancelTarget.endsAt)}
+          </p>
+          <p className="mt-2">Bokningen går inte att återställa efter avbokning.</p>
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

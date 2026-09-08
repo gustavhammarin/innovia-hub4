@@ -11,6 +11,12 @@ export interface UserRef {
   email: string;
 }
 
+export interface AppUser {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
 export interface ResourceRef {
   resourceId: string;
   name: string;

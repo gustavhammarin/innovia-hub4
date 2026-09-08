@@ -38,7 +38,7 @@ public static class BookingServiceExtensions
             .AddEndpointFilter<RequireCurrentUserFilter>();
 
         CreateBooking.Endpoint.Map(group)
-            .RequireAuthorization(AuthorizationPolicies.MemberOnly);
+            .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
         UpdateBooking.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
         GetBookingById.Endpoint.Map(group)
