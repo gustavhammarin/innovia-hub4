@@ -15,9 +15,13 @@ public static class Endpoint
             CancellationToken ct
         ) =>
         {
+            var targetUserId = currentUser.IsAdmin && request.UserId is not null
+                ? request.UserId.Value
+                : currentUser.UserId!.Value;
+
             var command = new Command(
                 request.ResourceId,
-                currentUser.UserId!.Value,
+                targetUserId,
                 request.StartsAt,
                 request.EndsAt
             );

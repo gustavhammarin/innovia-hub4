@@ -9,6 +9,12 @@ public sealed class Validator
     {
         var errors = new List<ValidationError>();
 
+        if (string.IsNullOrWhiteSpace(cmd.FirstName))
+            errors.Add(new ValidationError(nameof(cmd.FirstName), "First name is required"));
+
+        if (string.IsNullOrWhiteSpace(cmd.LastName))
+            errors.Add(new ValidationError(nameof(cmd.LastName), "Last name is required"));
+
         if (string.IsNullOrWhiteSpace(cmd.Email))
             errors.Add(new ValidationError(nameof(cmd.Email), "Email is required"));
         else if (!cmd.Email.Contains('@'))

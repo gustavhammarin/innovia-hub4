@@ -28,7 +28,7 @@ public class LogoutTests : IAsyncLifetime
 
     private async Task RegisterAsync(string email, string password)
     {
-        var response = await _client.PostAsJsonAsync("/auth/register", new { Email = email, Password = password });
+        var response = await _client.PostAsJsonAsync("/auth/register", new { FirstName = "Test", LastName = "User", Email = email, Password = password });
         var body = await response.Content.ReadAsStringAsync();
         Assert.True(response.StatusCode == HttpStatusCode.OK, $"Register failed: {response.StatusCode}: {body}");
     }

@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { ApiError } from "../../api/client";
+import type { Booking } from "../../api/types";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { useMyBookings } from "../../hooks/useBookings";
 import { useCancelBooking } from "../../hooks/useBookingMutations";
 import { splitBookings } from "../../lib/bookingGrouping";
@@ -7,12 +9,16 @@ import { formatDateTime } from "../../lib/date";
 
 export function MyBookingsPage() {
   const [error, setError] = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
+  const [showCancelled, setShowCancelled] = useState(false);
   const bookingsQuery = useMyBookings();
   const cancelMutation = useCancelBooking();
 
-  function cancel(id: string) {
+  function confirmCancel() {
+    if (!cancelTarget) return;
     setError(null);
-    cancelMutation.mutate(id, {
+    cancelMutation.mutate(cancelTarget.id, {
+      onSuccess: () => setCancelTarget(null),
       onError: (err) => setError(err instanceof ApiError ? err.message : "Kunde inte avboka"),
     });
   }
@@ -22,7 +28,6 @@ export function MyBookingsPage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Mina bokningar</h1>
-      {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {bookingsQuery.isLoading && <p className="text-gray-500">Laddar...</p>}
 
       <Section title="Kommande" empty="Inga kommande bokningar.">
@@ -31,8 +36,7 @@ export function MyBookingsPage() {
             key={b.id}
             resourceName={b.resource.name}
             when={`${formatDateTime(b.startsAt)} – ${formatDateTime(b.endsAt)}`}
-            onCancel={() => cancel(b.id)}
-            cancelling={cancelMutation.isPending}
+            onCancel={() => setCancelTarget(b)}
           />
         ))}
       </Section>
@@ -48,16 +52,51 @@ export function MyBookingsPage() {
       </Section>
 
       {cancelled.length > 0 && (
-        <Section title="Avbokade" empty="">
-          {cancelled.map((b) => (
-            <BookingRow
-              key={b.id}
-              resourceName={b.resource.name}
-              when={`${formatDateTime(b.startsAt)} – ${formatDateTime(b.endsAt)}`}
-              cancelledLabel
-            />
-          ))}
-        </Section>
+        <section className="mb-8">
+          <button
+            onClick={() => setShowCancelled((v) => !v)}
+            className="text-sm font-semibold uppercase tracking-wide text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 mb-3"
+          >
+            {showCancelled ? "Dölj avbokade" : `Visa avbokade (${cancelled.length})`}
+          </button>
+          {showCancelled && (
+            <div className="space-y-2">
+              {cancelled.map((b) => (
+                <BookingRow
+                  key={b.id}
+                  resourceName={b.resource.name}
+                  when={`${formatDateTime(b.startsAt)} – ${formatDateTime(b.endsAt)}`}
+                  cancelledLabel
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {cancelTarget && (
+        <ConfirmDialog
+          title="Avboka?"
+          confirmLabel="Avboka"
+          cancelLabel="Behåll bokningen"
+          danger
+          isPending={cancelMutation.isPending}
+          error={error}
+          onConfirm={confirmCancel}
+          onClose={() => {
+            setCancelTarget(null);
+            setError(null);
+          }}
+        >
+          <p>
+            <span className="font-medium text-gray-900 dark:text-gray-100">
+              {cancelTarget.resource.name}
+            </span>
+            <br />
+            {formatDateTime(cancelTarget.startsAt)} – {formatDateTime(cancelTarget.endsAt)}
+          </p>
+          <p className="mt-2">Bokningen går inte att återställa efter avbokning.</p>
+        </ConfirmDialog>
       )}
     </div>
   );
@@ -89,13 +128,11 @@ function BookingRow({
   resourceName,
   when,
   onCancel,
-  cancelling,
   cancelledLabel,
 }: {
   resourceName: string;
   when: string;
   onCancel?: () => void;
-  cancelling?: boolean;
   cancelledLabel?: boolean;
 }) {
   return (
@@ -110,8 +147,7 @@ function BookingRow({
       {onCancel && (
         <button
           onClick={onCancel}
-          disabled={cancelling}
-          className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+          className="text-sm font-medium text-red-600 hover:text-red-700"
         >
           Avboka
         </button>

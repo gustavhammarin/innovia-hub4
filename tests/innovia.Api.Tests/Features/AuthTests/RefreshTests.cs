@@ -28,10 +28,10 @@ public class RefreshTests : IAsyncLifetime
 
     private async Task<HttpResponseMessage> RegisterAndLoginAsync(string email, string password)
     {
-        var register = await _client.PostAsJsonAsync("/auth/register", new { Email = email, Password = password });
+        var register = await _client.PostAsJsonAsync("/auth/register", new { FirstName = "Test", LastName = "User", Email = email, Password = password });
         Assert.True(register.StatusCode == HttpStatusCode.OK, $"Register failed: {register.StatusCode}");
 
-        var login = await _client.PostAsJsonAsync("/auth/login", new { Email = email, Password = password });
+        var login = await _client.PostAsJsonAsync("/auth/login", new { FirstName = "Test", LastName = "User", Email = email, Password = password });
         Assert.True(login.StatusCode == HttpStatusCode.OK, $"Login failed: {login.StatusCode}");
         return login;
     }

@@ -10,6 +10,7 @@ using Innovia.Api.Features.Occupancy;
 using Innovia.Api.Features.Realtime;
 using Innovia.Api.Features.Resources;
 using Innovia.Api.Features.ResourceTypes;
+using Innovia.Api.Features.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -72,6 +73,7 @@ builder.Services.AddResourcesFeature();
 builder.Services.AddResourceTypesFeature();
 builder.Services.AddAvailabilityFeature();
 builder.Services.AddOccupancyFeature();
+builder.Services.AddUsersFeature();
 
 var app = builder.Build();
 
@@ -100,6 +102,7 @@ app.MapResourcesEndpoints();
 app.MapResourceTypesEndpoints();
 app.MapAvailabilityEndpoints();
 app.MapOccupancyEndpoints();
+app.MapUsersEndpoints();
 
 
 app.Run();

@@ -12,7 +12,7 @@ export const bookingsApi = {
     const qs = params.toString();
     return api.get<Booking[]>(`/bookings${qs ? `?${qs}` : ""}`);
   },
-  create: (data: { resourceId: string; startsAt: string; endsAt: string }) =>
+  create: (data: { resourceId: string; startsAt: string; endsAt: string; userId?: string }) =>
     api.post<Booking>("/bookings", data),
   update: (id: string, data: { resourceId: string; startsAt: string; endsAt: string }) =>
     api.put<Booking>(`/bookings/${id}`, data),

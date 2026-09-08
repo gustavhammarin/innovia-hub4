@@ -4,6 +4,7 @@ import { ResourceTypeFilter } from "../../components/ResourceTypeFilter";
 import { ApiError } from "../../api/client";
 import type { Resource } from "../../api/types";
 import { ResourceFormModal } from "./ResourceFormModal";
+import { BookingModal } from "../member/BookingModal";
 import { useResourcesAdmin, useResourceTypes } from "../../hooks/useResources";
 import {
   useResourceStatusMutation,
@@ -20,6 +21,7 @@ export function ResourcesAdminPage() {
 
   const [editing, setEditing] = useState<Resource | null>(null);
   const [creating, setCreating] = useState(false);
+  const [bookingResource, setBookingResource] = useState<Resource | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
 
@@ -98,6 +100,13 @@ export function ResourcesAdminPage() {
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2 flex-wrap">
                     <button
+                      onClick={() => setBookingResource(resource)}
+                      disabled={resource.status !== "Online"}
+                      className="text-indigo-600 hover:text-indigo-500 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Boka
+                    </button>
+                    <button
                       onClick={() => setEditing(resource)}
                       className="text-indigo-600 hover:text-indigo-500 font-medium"
                     >
@@ -167,6 +176,10 @@ export function ResourcesAdminPage() {
             setEditing(null);
           }}
         />
+      )}
+
+      {bookingResource && (
+        <BookingModal resource={bookingResource} onClose={() => setBookingResource(null)} />
       )}
     </div>
   );
