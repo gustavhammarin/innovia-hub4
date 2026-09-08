@@ -6,14 +6,20 @@ import { useAllBookings } from "../../hooks/useBookings";
 import { useCancelBooking } from "../../hooks/useBookingMutations";
 import { sortByStartDescending } from "../../lib/bookingGrouping";
 import { formatDateTime } from "../../lib/date";
+import { useAdminBookingUpdates } from "../../hooks/useAdminBookingsUpdates";
 
 export function BookingsAdminPage() {
+  useAdminBookingUpdates();
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
 
-  const bookingsQuery = useAllBookings({ from: from || undefined, to: to || undefined });
+  const bookingsQuery = useAllBookings({
+    from: from || undefined,
+    to: to || undefined,
+  });
   const cancelMutation = useCancelBooking();
 
   function confirmCancel() {
@@ -29,7 +35,9 @@ export function BookingsAdminPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Alla bokningar</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+        Alla bokningar
+      </h1>
 
       <div className="flex gap-4 mb-4 items-end">
         <div>
@@ -86,15 +94,21 @@ export function BookingsAdminPage() {
                 <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                   {b.resource.name}
                 </td>
-                <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{b.user.email}</td>
+                <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                  {b.user.email}
+                </td>
                 <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                   {formatDateTime(b.startsAt)} – {formatDateTime(b.endsAt)}
                 </td>
                 <td className="px-4 py-3">
                   {b.cancelledAt ? (
-                    <span className="text-xs font-medium text-red-500">Avbokad</span>
+                    <span className="text-xs font-medium text-red-500">
+                      Avbokad
+                    </span>
                   ) : (
-                    <span className="text-xs font-medium text-green-600">Aktiv</span>
+                    <span className="text-xs font-medium text-green-600">
+                      Aktiv
+                    </span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -112,7 +126,9 @@ export function BookingsAdminPage() {
           </tbody>
         </table>
         {bookings.length === 0 && !bookingsQuery.isLoading && (
-          <p className="text-sm text-gray-500 px-4 py-6">Inga bokningar hittades.</p>
+          <p className="text-sm text-gray-500 px-4 py-6">
+            Inga bokningar hittades.
+          </p>
         )}
       </div>
 

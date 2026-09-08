@@ -20,6 +20,9 @@ public sealed class SignalRBookingNotifier : IBookingNotifier
     {
         await _hub.Clients.Group(RealtimeGroups.Resource(resourceId))
             .SendAsync(BookingEvents.BookingCreated, new {resourceId}, ct);
+
+        await _hub.Clients.Group(RealtimeGroups.AllBookings())
+            .SendAsync(BookingEvents.BookingCreated, new {resourceId}, ct);
     }
 
     public async Task BookingUpdatedAsync(Guid oldResourceId, Guid newResourceId, CancellationToken ct = default)

@@ -9,4 +9,10 @@ public class BookingHub : Hub
     
     public Task LeaveResourceGroup(Guid resourceId) =>
         Groups.RemoveFromGroupAsync(Context.ConnectionId, RealtimeGroups.Resource(resourceId));
+
+    public Task JoinAdminBookingsGroup() => 
+        Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.AllBookings());
+
+    public Task LeaveAdminBookingsGroup () =>
+        Groups.RemoveFromGroupAsync(Context.ConnectionId, RealtimeGroups.AllBookings());
 }
