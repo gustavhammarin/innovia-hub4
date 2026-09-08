@@ -6,6 +6,7 @@ using Innovia.Api.Common.OpenApi;
 using Innovia.Api.Features.Auth;
 using Innovia.Api.Features.Availability;
 using Innovia.Api.Features.Bookings;
+using Innovia.Api.Features.Realtime;
 using Innovia.Api.Features.Resources;
 using Innovia.Api.Features.ResourceTypes;
 using Microsoft.AspNetCore.Identity;
@@ -58,6 +59,9 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
+builder.Services.AddSignalR(options => 
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment());
+
 builder.Services.AddAppAuthentication(builder.Configuration);
 builder.Services.AddSeeders();
 
@@ -85,6 +89,7 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<BookingHub>("/hubs/bookings");
 
 app.MapAuthEndpoints();
 app.MapBookingsEndpoints();
