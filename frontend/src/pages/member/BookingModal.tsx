@@ -9,6 +9,7 @@ import { useWeekRange } from "../../hooks/useWeekRange";
 import { useSlotSelection } from "../../hooks/useSlotSelection";
 import { groupSlotsByDate } from "../../lib/availability";
 import { formatDate, formatTime } from "../../lib/date";
+import { useResourceBookingUpdates } from "../../hooks/useResourceBookingUpdates";
 
 export function BookingModal({ resource, onClose }: { resource: Resource; onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export function BookingModal({ resource, onClose }: { resource: Resource; onClos
     useSlotSelection(slotsByDate, maxDurationMinutes);
 
   const bookMutation = useCreateBooking();
+  useResourceBookingUpdates(resource.id);
 
   function handleBook() {
     if (!rangeStart || !rangeEnd) return;

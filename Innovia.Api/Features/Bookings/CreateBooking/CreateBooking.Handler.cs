@@ -11,11 +11,13 @@ public sealed class Handler
 {
     private readonly AppDbContext _context;
     private readonly BookingRulesService _bookingRulesService;
+    private readonly IBookingNotifier _notifier;
 
-    public Handler(AppDbContext context, BookingRulesService bookingRulesService)
+    public Handler(AppDbContext context, BookingRulesService bookingRulesService, IBookingNotifier notifier)
     {
         _context = context;
         _bookingRulesService = bookingRulesService;
+        _notifier = notifier;
     }
 
     public async Task<Result<Response>> HandleAsync(Command cmd, CancellationToken ct)
@@ -48,6 +50,8 @@ public sealed class Handler
         {
             return Result<Response>.Fail(BookingErrors.InvalidReference());
         }
+
+        await _notifier.BookingCreatedAsync(booking.ResourceId, ct);
 
         var resource = await _context.Resources
             .AsNoTracking()

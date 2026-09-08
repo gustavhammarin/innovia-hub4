@@ -1,4 +1,5 @@
 using Innovia.Api.Common.Auth;
+using Innovia.Api.Features.Realtime;
 
 namespace Innovia.Api.Features.Bookings;
 
@@ -24,6 +25,8 @@ public static class BookingServiceExtensions
 
         services.AddScoped<CancelBooking.Handler>();
         services.AddScoped<CancelBooking.Validator>();
+
+        services.AddScoped<IBookingNotifier, SignalRBookingNotifier>();
         
         return services;
     }

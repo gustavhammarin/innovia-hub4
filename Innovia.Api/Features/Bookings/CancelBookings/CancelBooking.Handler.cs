@@ -8,9 +8,11 @@ namespace Innovia.Api.Features.Bookings.CancelBooking;
 public class Handler
 {
     private readonly AppDbContext _dbContext;
-    public Handler(AppDbContext dbContext)
+    private readonly IBookingNotifier _notifier;
+    public Handler(AppDbContext dbContext, IBookingNotifier notifier)
     {
         _dbContext = dbContext;
+        _notifier = notifier;
     }
     public async Task<Result<Response>> HandleAsync(Command command, CancellationToken ct)
     {
@@ -29,6 +31,8 @@ public class Handler
         booking.CancelledAt = DateTimeOffset.UtcNow;
 
         await _dbContext.SaveChangesAsync(ct);
+
+        await _notifier.BookingCancelledAsync(booking.ResourceId);
 
         return Result<Response>.Ok(new Response(
             booking.Id,
