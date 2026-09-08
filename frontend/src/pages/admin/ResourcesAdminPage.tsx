@@ -6,10 +6,19 @@ import type { Resource } from "../../api/types";
 import { ResourceFormModal } from "./ResourceFormModal";
 import { BookingModal } from "../member/BookingModal";
 import { useResourcesAdmin, useResourceTypes } from "../../hooks/useResources";
-import { useResourceStatusMutation, type ResourceStatusAction } from "../../hooks/useResourceMutations";
-import { buildTypeNameMap, filterByResourceType } from "../../lib/resourceGrouping";
+import {
+  useResourceStatusMutation,
+  type ResourceStatusAction,
+} from "../../hooks/useResourceMutations";
+import {
+  buildTypeNameMap,
+  filterByResourceType,
+} from "../../lib/resourceGrouping";
+import { useResourceStatusUpdates } from "../../hooks/useResourceStatusUpdates";
 
 export function ResourcesAdminPage() {
+  useResourceStatusUpdates();
+
   const [editing, setEditing] = useState<Resource | null>(null);
   const [creating, setCreating] = useState(false);
   const [bookingResource, setBookingResource] = useState<Resource | null>(null);
@@ -26,16 +35,24 @@ export function ResourcesAdminPage() {
     setError(null);
     actionMutation.mutate(
       { id, action },
-      { onError: (err) => setError(err instanceof ApiError ? err.message : "Något gick fel") }
+      {
+        onError: (err) =>
+          setError(err instanceof ApiError ? err.message : "Något gick fel"),
+      },
     );
   }
 
-  const resources = filterByResourceType(resourcesQuery.data ?? [], selectedTypeId);
+  const resources = filterByResourceType(
+    resourcesQuery.data ?? [],
+    selectedTypeId,
+  );
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Resurser (admin)</h1>
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+          Resurser (admin)
+        </h1>
         <button
           onClick={() => setCreating(true)}
           className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
@@ -67,8 +84,12 @@ export function ResourcesAdminPage() {
             {resources.map((resource) => (
               <tr key={resource.id}>
                 <td className="px-4 py-3">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">{resource.name}</div>
-                  <div className="text-gray-500 dark:text-gray-400">{resource.description}</div>
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {resource.name}
+                  </div>
+                  <div className="text-gray-500 dark:text-gray-400">
+                    {resource.description}
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                   {typeNameById.get(resource.resourceTypeId) ?? "-"}
@@ -91,30 +112,33 @@ export function ResourcesAdminPage() {
                     >
                       Redigera
                     </button>
-                    {resource.status !== "Online" && resource.status !== "Archived" && (
-                      <button
-                        onClick={() => runAction(resource.id, "online")}
-                        className="text-green-600 hover:text-green-500 font-medium"
-                      >
-                        Online
-                      </button>
-                    )}
-                    {resource.status !== "Maintenance" && resource.status !== "Archived" && (
-                      <button
-                        onClick={() => runAction(resource.id, "maintenance")}
-                        className="text-amber-600 hover:text-amber-500 font-medium"
-                      >
-                        Underhåll
-                      </button>
-                    )}
-                    {resource.status !== "Offline" && resource.status !== "Archived" && (
-                      <button
-                        onClick={() => runAction(resource.id, "offline")}
-                        className="text-gray-500 hover:text-gray-700 font-medium"
-                      >
-                        Offline
-                      </button>
-                    )}
+                    {resource.status !== "Online" &&
+                      resource.status !== "Archived" && (
+                        <button
+                          onClick={() => runAction(resource.id, "online")}
+                          className="text-green-600 hover:text-green-500 font-medium"
+                        >
+                          Online
+                        </button>
+                      )}
+                    {resource.status !== "Maintenance" &&
+                      resource.status !== "Archived" && (
+                        <button
+                          onClick={() => runAction(resource.id, "maintenance")}
+                          className="text-amber-600 hover:text-amber-500 font-medium"
+                        >
+                          Underhåll
+                        </button>
+                      )}
+                    {resource.status !== "Offline" &&
+                      resource.status !== "Archived" && (
+                        <button
+                          onClick={() => runAction(resource.id, "offline")}
+                          className="text-gray-500 hover:text-gray-700 font-medium"
+                        >
+                          Offline
+                        </button>
+                      )}
                     {resource.status === "Archived" ? (
                       <button
                         onClick={() => runAction(resource.id, "unarchive")}
@@ -137,7 +161,9 @@ export function ResourcesAdminPage() {
           </tbody>
         </table>
         {resources.length === 0 && !resourcesQuery.isLoading && (
-          <p className="text-sm text-gray-500 px-4 py-6">Inga resurser av den valda typen.</p>
+          <p className="text-sm text-gray-500 px-4 py-6">
+            Inga resurser av den valda typen.
+          </p>
         )}
       </div>
 

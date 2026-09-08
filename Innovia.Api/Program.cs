@@ -92,6 +92,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<BookingHub>("/hubs/bookings");
+app.MapHub<ResourceHub>("/hubs/resources");
 
 app.MapAuthEndpoints();
 app.MapBookingsEndpoints();

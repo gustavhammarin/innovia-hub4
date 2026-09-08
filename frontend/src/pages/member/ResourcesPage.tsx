@@ -4,9 +4,16 @@ import { ResourceTypeFilter } from "../../components/ResourceTypeFilter";
 import type { Resource } from "../../api/types";
 import { BookingModal } from "./BookingModal";
 import { useResources, useResourceTypes } from "../../hooks/useResources";
-import { buildTypeNameMap, filterByResourceType, groupByTypeName } from "../../lib/resourceGrouping";
+import {
+  buildTypeNameMap,
+  filterByResourceType,
+  groupByTypeName,
+} from "../../lib/resourceGrouping";
+import { useResourceStatusUpdates } from "../../hooks/useResourceStatusUpdates";
 
 export function ResourcesPage() {
+  useResourceStatusUpdates();
+
   const [bookingResource, setBookingResource] = useState<Resource | null>(null);
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
 
@@ -14,12 +21,17 @@ export function ResourcesPage() {
   const typesQuery = useResourceTypes();
 
   const typeNameById = buildTypeNameMap(typesQuery.data ?? []);
-  const visibleResources = filterByResourceType(resourcesQuery.data ?? [], selectedTypeId);
+  const visibleResources = filterByResourceType(
+    resourcesQuery.data ?? [],
+    selectedTypeId,
+  );
   const grouped = groupByTypeName(visibleResources, typeNameById);
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Resurser</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        Resurser
+      </h1>
 
       <ResourceTypeFilter
         resourceTypes={typesQuery.data ?? []}
@@ -27,7 +39,9 @@ export function ResourcesPage() {
         onChange={setSelectedTypeId}
       />
 
-      {resourcesQuery.isLoading && <p className="text-gray-500">Laddar resurser...</p>}
+      {resourcesQuery.isLoading && (
+        <p className="text-gray-500">Laddar resurser...</p>
+      )}
       {!resourcesQuery.isLoading && visibleResources.length === 0 && (
         <p className="text-gray-500">Inga resurser av den valda typen.</p>
       )}
@@ -45,7 +59,9 @@ export function ResourcesPage() {
                   className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex flex-col gap-2"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100">{resource.name}</h3>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                      {resource.name}
+                    </h3>
                     <StatusBadge status={resource.status} />
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 flex-1">
@@ -66,7 +82,10 @@ export function ResourcesPage() {
       </div>
 
       {bookingResource && (
-        <BookingModal resource={bookingResource} onClose={() => setBookingResource(null)} />
+        <BookingModal
+          resource={bookingResource}
+          onClose={() => setBookingResource(null)}
+        />
       )}
     </div>
   );

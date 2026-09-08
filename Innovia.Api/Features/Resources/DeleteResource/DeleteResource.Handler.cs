@@ -1,6 +1,7 @@
 using Innovia.Api.Common.Database;
 using Innovia.Api.Common.Database.Entities;
 using Innovia.Api.Common.Result;
+using Innovia.Api.Features.Realtime;
 using Microsoft.EntityFrameworkCore;
 
 namespace Innovia.Api.Features.Resources.DeleteResource;
@@ -8,10 +9,12 @@ namespace Innovia.Api.Features.Resources.DeleteResource;
 public sealed class Handler
 {
     private readonly AppDbContext _context;
+    private readonly IResourceNotifier _notifier;
 
-    public Handler(AppDbContext context)
+    public Handler(AppDbContext context, IResourceNotifier notifier)
     {
         _context = context;
+        _notifier = notifier;
     }
 
     public async Task<Result<Response>> HandleAsync(Command command, CancellationToken ct)
@@ -39,6 +42,8 @@ public sealed class Handler
 
         resource.Status = ResourceStatus.Archived;
         await _context.SaveChangesAsync(ct);
+
+        await _notifier.ResourceStatusChangedAsync(resource.Id, resource.Status, ct);
 
         return Result<Response>.Ok(new Response(resource.Id, resource.Status));
     }
