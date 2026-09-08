@@ -1,4 +1,5 @@
 using Innovia.Api.Common.Auth;
+using Innovia.Api.Features.Realtime;
 
 namespace Innovia.Api.Features.Resources;
 
@@ -36,6 +37,8 @@ public static class ResourceServiceExtensions
 
         services.AddScoped<SetResourceOffline.Handler>();
         services.AddScoped<SetResourceOffline.Validator>();
+
+        services.AddScoped<IResourceNotifier, SignalRResourceNotifier>();
 
         return services;
     }
