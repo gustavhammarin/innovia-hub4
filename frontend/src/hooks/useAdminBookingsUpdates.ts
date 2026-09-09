@@ -21,6 +21,7 @@ export function useAdminBookingUpdates() {
 
     function invalidate() {
       queryClient.invalidateQueries({ queryKey: ["allBookings"] });
+      queryClient.invalidateQueries({ queryKey: ["occupancy"] });
     }
 
     conn.on(BookingEvents.BookingCreated, invalidate);

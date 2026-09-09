@@ -20,6 +20,7 @@ export function useResourceStatusUpdates() {
     function invalidate() {
       queryClient.invalidateQueries({ queryKey: ["resourcesAdmin"] });
       queryClient.invalidateQueries({ queryKey: ["resources"] });
+      queryClient.invalidateQueries({ queryKey: ["occupancy"] });
     }
 
     conn.on(ResourceEvents.ResourceStatusChanged, invalidate);
