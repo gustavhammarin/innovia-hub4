@@ -9,6 +9,7 @@ import { MyBookingsPage } from "./pages/member/MyBookingsPage";
 import { ResourcesAdminPage } from "./pages/admin/ResourcesAdminPage";
 import { ResourceTypesAdminPage } from "./pages/admin/ResourceTypesAdminPage";
 import { BookingsAdminPage } from "./pages/admin/BookingsAdminPage";
+import { OccupancyPage } from "./pages/admin/OccupancyPage";
 
 export default function App() {
   return (
@@ -62,6 +63,14 @@ export default function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <BookingsAdminPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/occupancy"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <OccupancyPage />
                 </ProtectedRoute>
               }
             />
