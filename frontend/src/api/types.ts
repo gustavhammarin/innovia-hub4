@@ -68,6 +68,7 @@ export type CurrentOccupancy = {
     name: string;
     bookedCount: number;
     totalCount: number;
+    percentage: number;
   }[];
 };
 

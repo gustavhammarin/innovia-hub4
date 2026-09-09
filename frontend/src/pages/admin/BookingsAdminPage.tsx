@@ -7,7 +7,6 @@ import { useCancelBooking } from "../../hooks/useBookingMutations";
 import { sortByStartDescending } from "../../lib/bookingGrouping";
 import { formatDateTime } from "../../lib/date";
 import { useAdminBookingUpdates } from "../../hooks/useAdminBookingsUpdates";
-import { OccupancyWidget } from "./OccupancyWidget";
 
 export function BookingsAdminPage() {
   useAdminBookingUpdates();
@@ -28,7 +27,8 @@ export function BookingsAdminPage() {
     setError(null);
     cancelMutation.mutate(cancelTarget.id, {
       onSuccess: () => setCancelTarget(null),
-      onError: (err) => setError(err instanceof ApiError ? err.message : "Kunde inte avboka"),
+      onError: (err) =>
+        setError(err instanceof ApiError ? err.message : "Kunde inte avboka"),
     });
   }
 
@@ -39,8 +39,6 @@ export function BookingsAdminPage() {
       <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
         Alla bokningar
       </h1>
-
-      <OccupancyWidget from={from} to={to} />
 
       <div className="flex gap-4 mb-4 items-end">
         <div>
@@ -156,9 +154,12 @@ export function BookingsAdminPage() {
             <br />
             {cancelTarget.user.email}
             <br />
-            {formatDateTime(cancelTarget.startsAt)} – {formatDateTime(cancelTarget.endsAt)}
+            {formatDateTime(cancelTarget.startsAt)} –{" "}
+            {formatDateTime(cancelTarget.endsAt)}
           </p>
-          <p className="mt-2">Bokningen går inte att återställa efter avbokning.</p>
+          <p className="mt-2">
+            Bokningen går inte att återställa efter avbokning.
+          </p>
         </ConfirmDialog>
       )}
     </div>

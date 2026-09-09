@@ -46,12 +46,19 @@ public sealed class Handler
 
         var byResourceType = resources
             .GroupBy(r => r.ResourceTypeId)
-            .Select(g => new ResourceTypeOccupancy(
-                g.Key,
-                resourceTypes.TryGetValue(g.Key, out var type) ? type.Name : "Okänd",
-                g.Count(r => bookedSet.Contains(r.Id)),
-                g.Count()
-            ))
+            .Select(g =>
+            {
+                var bookedCount = g.Count(r => bookedSet.Contains(r.Id));
+                var totalCount = g.Count();
+                var percentage = totalCount == 0 ? 0 : Math.Round(bookedCount * 100.0 / totalCount, 1);
+                return new ResourceTypeOccupancy(
+                    g.Key,
+                    resourceTypes.TryGetValue(g.Key, out var type) ? type.Name : "Okänd",
+                    bookedCount,
+                    totalCount,
+                    percentage
+                );
+            })
             .ToList();
 
         var totalPercentage = resources.Count == 0
