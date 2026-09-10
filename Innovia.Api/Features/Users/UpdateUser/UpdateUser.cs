@@ -1,0 +1,4 @@
+using Innovia.Api.Common.Database.Entities; using Microsoft.AspNetCore.Identity;
+namespace Innovia.Api.Features.Users.UpdateUser;
+public sealed record Request(string FirstName,string LastName,string Email,string? NewPassword);
+public static class Endpoint { public static void Map(IEndpointRouteBuilder app)=>app.MapPut("/{id:guid}",async(Guid id,Request r,UserManager<ApplicationUser> um)=>{var u=await um.FindByIdAsync(id.ToString());if(u is null)return Results.NotFound();u.FirstName=r.FirstName.Trim();u.LastName=r.LastName.Trim();u.Email=r.Email.Trim();u.UserName=u.Email;var x=await um.UpdateAsync(u);if(!x.Succeeded)return Results.BadRequest(x.Errors.Select(e=>e.Description));if(!string.IsNullOrWhiteSpace(r.NewPassword)){var token=await um.GeneratePasswordResetTokenAsync(u);x=await um.ResetPasswordAsync(u,token,r.NewPassword);if(!x.Succeeded)return Results.BadRequest(x.Errors.Select(e=>e.Description));}return Results.Ok();});}

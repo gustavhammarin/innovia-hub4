@@ -20,7 +20,8 @@ public class AppDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, G
         builder.Entity<Booking>(b =>
         {
             b.HasKey(x => x.Id);
-            b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.UserId);
+            // UserId is retained as a historical reference after a hard user delete.
+            b.HasIndex(x => x.UserId);
             b.HasOne<Resource>().WithMany().HasForeignKey(x => x.ResourceId);
         });
 

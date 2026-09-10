@@ -36,6 +36,10 @@ public sealed class Handler
             CreatedAt = DateTimeOffset.UtcNow
         };
 
+        var bookingUser = await _context.Users.AsNoTracking().FirstAsync(u => u.Id == cmd.UserId, ct);
+        booking.UserNameSnapshot = $"{bookingUser.FirstName} {bookingUser.LastName}".Trim();
+        booking.UserEmailSnapshot = bookingUser.Email ?? "Unknown";
+
         await _context.Bookings.AddAsync(booking, ct);
 
         try
@@ -58,15 +62,10 @@ public sealed class Handler
             .Select(r => new {r.Id, r.Name, r.Description})
             .FirstAsync(r => r.Id == booking.ResourceId, ct);
         
-        var user = await _context.Users
-            .AsNoTracking()
-            .Select(u => new {u.Id, u.Email})
-            .FirstAsync(u => u.Id == booking.UserId, ct);
-        
         var resp = new Response
         (
             booking.Id,
-            new UserRef(user.Id, user.Email ?? "Unknown"),
+            new UserRef(booking.UserId, booking.UserEmailSnapshot),
             new ResourceRef(resource.Id, resource.Name, resource.Description),
             booking.StartsAt,
             booking.EndsAt,

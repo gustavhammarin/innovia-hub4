@@ -30,14 +30,16 @@ public static class Endpoint
                 AuthCookieNames.AccessToken,
                 result.Value!.AccessToken,
                 CookieOptionsFactory.CreateAccessTokenCookieOptions(
-                    DateTimeOffset.UtcNow.AddMinutes(jwtSettings.Value.AccessTokenExpirationMinutes)
+                    DateTimeOffset.UtcNow.AddMinutes(jwtSettings.Value.AccessTokenExpirationMinutes),
+                    httpContext.Request.IsHttps
                 )
             );
             httpContext.Response.Cookies.Append(
                 AuthCookieNames.RefreshToken,
                 result.Value!.RefreshToken,
                 CookieOptionsFactory.CreateRefreshTokenCookieOptions(
-                    DateTimeOffset.UtcNow.AddDays(jwtSettings.Value.RefreshTokenExpirationDays)
+                    DateTimeOffset.UtcNow.AddDays(jwtSettings.Value.RefreshTokenExpirationDays),
+                    httpContext.Request.IsHttps
                 )
             );
 
