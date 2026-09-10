@@ -20,6 +20,8 @@ using GetResourceByIdHandler = Innovia.Api.Features.Resources.GetResourceById.Ha
 using GetResourceByIdCommand = Innovia.Api.Features.Resources.GetResourceById.Command;
 using GetResourceByIdAdminHandler = Innovia.Api.Features.Resources.GetResourceByIdAdmin.Handler;
 using GetResourceByIdAdminCommand = Innovia.Api.Features.Resources.GetResourceByIdAdmin.Command;
+using Moq;
+using Innovia.Api.Features.Realtime;
 
 namespace Innovia.Api.Tests.Features.ResourceTests;
 
@@ -108,7 +110,7 @@ public class ResourceStatusTests
     {
         await using var context = _fixture.CreateDbContext();
         var (_, resourceId) = await SeedResourceAsync(context);
-        var handler = new DeleteResourceHandler(context);
+        var handler = new DeleteResourceHandler(context, Mock.Of<IResourceNotifier>());
 
         var result = await handler.HandleAsync(new DeleteResourceCommand(resourceId), CancellationToken.None);
 
@@ -133,7 +135,7 @@ public class ResourceStatusTests
         });
         await context.SaveChangesAsync();
 
-        var handler = new DeleteResourceHandler(context);
+        var handler = new DeleteResourceHandler(context, Mock.Of<IResourceNotifier>());
         var result = await handler.HandleAsync(new DeleteResourceCommand(resourceId), CancellationToken.None);
 
         Assert.False(result.IsSuccess);
@@ -146,7 +148,7 @@ public class ResourceStatusTests
     {
         await using var context = _fixture.CreateDbContext();
         var (_, resourceId) = await SeedResourceAsync(context, ResourceStatus.Archived);
-        var handler = new UnarchiveResourceHandler(context);
+        var handler = new UnarchiveResourceHandler(context, Mock.Of<IResourceNotifier>());
 
         var result = await handler.HandleAsync(new UnarchiveResourceCommand(resourceId), CancellationToken.None);
 
@@ -173,7 +175,7 @@ public class ResourceStatusTests
     {
         await using var context = _fixture.CreateDbContext();
         var (_, resourceId) = await SeedResourceAsync(context);
-        var handler = new SetResourceMaintenanceHandler(context);
+        var handler = new SetResourceMaintenanceHandler(context, Mock.Of<IResourceNotifier>());
 
         var result = await handler.HandleAsync(new SetResourceMaintenanceCommand(resourceId), CancellationToken.None);
 
@@ -187,7 +189,7 @@ public class ResourceStatusTests
     {
         await using var context = _fixture.CreateDbContext();
         var (_, resourceId) = await SeedResourceAsync(context, ResourceStatus.Maintenance);
-        var handler = new SetResourceOnlineHandler(context);
+        var handler = new SetResourceOnlineHandler(context, Mock.Of<IResourceNotifier>());
 
         var result = await handler.HandleAsync(new SetResourceOnlineCommand(resourceId), CancellationToken.None);
 
@@ -201,7 +203,7 @@ public class ResourceStatusTests
     {
         await using var context = _fixture.CreateDbContext();
         var (_, resourceId) = await SeedResourceAsync(context);
-        var handler = new SetResourceOfflineHandler(context);
+        var handler = new SetResourceOfflineHandler(context, Mock.Of<IResourceNotifier>());
 
         var result = await handler.HandleAsync(new SetResourceOfflineCommand(resourceId), CancellationToken.None);
 
@@ -215,7 +217,7 @@ public class ResourceStatusTests
     {
         await using var context = _fixture.CreateDbContext();
         var (_, resourceId) = await SeedResourceAsync(context, ResourceStatus.Archived);
-        var handler = new SetResourceMaintenanceHandler(context);
+        var handler = new SetResourceMaintenanceHandler(context, Mock.Of<IResourceNotifier>());
 
         var result = await handler.HandleAsync(new SetResourceMaintenanceCommand(resourceId), CancellationToken.None);
 
@@ -229,7 +231,7 @@ public class ResourceStatusTests
     {
         await using var context = _fixture.CreateDbContext();
         var (_, resourceId) = await SeedResourceAsync(context, ResourceStatus.Archived);
-        var handler = new SetResourceOnlineHandler(context);
+        var handler = new SetResourceOnlineHandler(context, Mock.Of<IResourceNotifier>());
 
         var result = await handler.HandleAsync(new SetResourceOnlineCommand(resourceId), CancellationToken.None);
 
@@ -243,7 +245,7 @@ public class ResourceStatusTests
     {
         await using var context = _fixture.CreateDbContext();
         var (_, resourceId) = await SeedResourceAsync(context, ResourceStatus.Archived);
-        var handler = new SetResourceOfflineHandler(context);
+        var handler = new SetResourceOfflineHandler(context, Mock.Of<IResourceNotifier>());
 
         var result = await handler.HandleAsync(new SetResourceOfflineCommand(resourceId), CancellationToken.None);
 

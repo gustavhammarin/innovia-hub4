@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Innovia.Api.Common.Database;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
@@ -14,21 +13,23 @@ public class DatabaseFixture : IAsyncLifetime
         .Build();
 
     public string ConnectionString => _container.GetConnectionString();
-    public async Task DisposeAsync()
-    {
-        await _container.DisposeAsync();
-    }
 
     public async Task InitializeAsync()
     {
-        await _container.StartAsync();
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        await _container.StartAsync(cts.Token);
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(ConnectionString)
             .Options;
-        
+
         await using var context = new AppDbContext(options);
         await context.Database.MigrateAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _container.DisposeAsync();
     }
 
     public AppDbContext CreateDbContext()
