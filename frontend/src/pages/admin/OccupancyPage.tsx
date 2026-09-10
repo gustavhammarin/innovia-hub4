@@ -12,8 +12,10 @@ import {
   useCurrentOccupancy,
   useRangeOccupancy,
 } from "../../hooks/useOccupancy";
+import { useAdminBookingUpdates } from "../../hooks/useAdminBookingsUpdates";
+import { useResourceStatusUpdates } from "../../hooks/useResourceStatusUpdates";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#22c55e", "#ef4444", "#f59e0b"];
+const COLORS = ["#1d4ed8", "#7c3aed", "#16a34a", "#0ea5e9", "#64748b"];
 
 function CustomTooltip({ active, payload }: any) {
   if (!active || !payload || payload.length === 0) return null;
@@ -40,6 +42,9 @@ function CustomTooltip({ active, payload }: any) {
 }
 
 export function OccupancyPage() {
+  useAdminBookingUpdates();
+  useResourceStatusUpdates();
+
   const [view, setView] = useState<"current" | "range">("current");
   const [from, setFrom] = useState(new Date().toISOString().split("T")[0]);
   const [to, setTo] = useState(new Date().toISOString().split("T")[0]);
