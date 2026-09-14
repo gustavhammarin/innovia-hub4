@@ -37,20 +37,22 @@ export function BookingsAdminPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-        Alla bokningar
-      </h1>
+      <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-1 pb-3 mb-1">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Alla bokningar
+        </h1>
 
-      <div className="flex flex-wrap gap-4 mb-4 items-end">
-        <MobileDatePicker label="Från" value={from} onChange={setFrom} maxDate={to || undefined} />
-        <MobileDatePicker label="Till" value={to} onChange={setTo} minDate={from || undefined} />
+        <div className="flex gap-3 items-end">
+          <MobileDatePicker label="Från" value={from} onChange={setFrom} maxDate={to || undefined} />
+          <MobileDatePicker label="Till" value={to} onChange={setTo} minDate={from || undefined} />
+        </div>
         {(from || to) && (
           <button
             onClick={() => {
               setFrom("");
               setTo("");
             }}
-            className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 pb-2"
+            className="mt-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
           >
             Rensa filter
           </button>

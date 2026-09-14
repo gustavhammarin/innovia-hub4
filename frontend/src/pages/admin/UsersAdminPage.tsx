@@ -91,25 +91,27 @@ export function UsersAdminPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Användare</h1>
-          <p className="mt-1 text-sm text-gray-500">Hantera konton och bevara bokningshistorik.</p>
+      <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-1 pb-3 mb-1">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Användare</h1>
+            <p className="mt-1 text-sm text-gray-500">Hantera konton och bevara bokningshistorik.</p>
+          </div>
+          <button
+            onClick={openCreate}
+            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
+          >
+            + Lägg till användare
+          </button>
         </div>
-        <button
-          onClick={openCreate}
-          className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
-        >
-          + Lägg till användare
-        </button>
-      </div>
 
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Sök namn eller e-post"
-        className="mb-4 w-full min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-gray-100"
-      />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Sök namn eller e-post"
+          className="w-full min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-gray-100"
+        />
+      </div>
 
       {users.isLoading && <p className="text-sm text-gray-500">Laddar användare…</p>}
       {users.isError && (
