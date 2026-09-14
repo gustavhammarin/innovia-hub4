@@ -37,7 +37,7 @@ export function BookingsAdminPage() {
 
   return (
     <div>
-      <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-1 pb-3 mb-1">
+      <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-4 pb-3 mb-1">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Alla bokningar
         </h1>
