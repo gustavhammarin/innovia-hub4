@@ -34,11 +34,11 @@ public sealed class Handler
         var user = await _context.Users
             .AsNoTracking()
             .Select(u => new { u.Id, u.Email })
-            .FirstAsync(u => u.Id == booking.UserId, ct);
+            .FirstOrDefaultAsync(u => u.Id == booking.UserId, ct);
 
         var resp = new BookingResponse(
             booking.Id,
-            new UserRef(user.Id, user.Email ?? "Unknown"),
+            new UserRef(booking.UserId, user?.Email ?? booking.UserEmailSnapshot),
             new ResourceRef (resource.Id, resource.Name, resource.Description),
             booking.StartsAt,
             booking.EndsAt,

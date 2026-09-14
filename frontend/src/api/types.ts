@@ -17,6 +17,14 @@ export interface AppUser {
   email: string;
 }
 
+export interface UserFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string;
+  newPassword?: string | null;
+}
+
 export interface ResourceRef {
   resourceId: string;
   name: string;

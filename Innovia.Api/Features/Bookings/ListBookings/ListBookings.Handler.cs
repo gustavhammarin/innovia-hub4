@@ -59,7 +59,7 @@ public sealed class Handler
 
         var responses = bookings.Select(b => new BookingResponse(
             b.Id,
-            new UserRef(users[b.UserId].Id, users[b.UserId].Email ?? "Unknown"),
+            new UserRef(b.UserId, users.TryGetValue(b.UserId, out var user) ? user.Email ?? b.UserEmailSnapshot : b.UserEmailSnapshot),
             new ResourceRef(resources[b.ResourceId].Id, resources[b.ResourceId].Name, resources[b.ResourceId].Description),
             b.StartsAt,
             b.EndsAt,

@@ -13,11 +13,14 @@ public static class UserServiceExtensions
 
     public static IEndpointRouteBuilder MapUsersEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/users")
-            .WithTags("Users");
-
-        ListUsers.Endpoint.Map(group)
+        var group = app.MapGroup("/admin/users")
+            .WithTags("Users")
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
+
+        ListUsers.Endpoint.Map(group);
+        CreateUser.Endpoint.Map(group);
+        UpdateUser.Endpoint.Map(group);
+        DeleteUser.Endpoint.Map(group);
 
         return group;
     }

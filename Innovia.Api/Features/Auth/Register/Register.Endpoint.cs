@@ -33,7 +33,8 @@ public static class Endpoint
                 AuthCookieNames.AccessToken,
                 result.Value!,
                 CookieOptionsFactory.CreateAccessTokenCookieOptions(
-                    DateTimeOffset.UtcNow.AddMinutes(jwtSettings.Value.AccessTokenExpirationMinutes)
+                    DateTimeOffset.UtcNow.AddMinutes(jwtSettings.Value.AccessTokenExpirationMinutes),
+                    httpContext.Request.IsHttps
                 )
             );
 
