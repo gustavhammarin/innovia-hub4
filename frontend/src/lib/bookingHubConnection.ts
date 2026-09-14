@@ -11,11 +11,11 @@ const JoinResourceGroup: string = "JoinResourceGroup";
 
 const JoinAdminBookingsGroup: string = "JoinAdminBookingsGroup";
 const LeaveAdminBookingsGroup: string = "LeaveAdminBookingsGroup";
-let adminGroupJoined = false;
+let adminGroupRefCount = 0;
 
 let connection: HubConnection | null = null;
 let startPromise: Promise<void> | null = null;
-const joinedResourceIds = new Set<string>();
+const resourceGroupRefCounts = new Map<string, number>();
 
 function buildConnection(): HubConnection {
   const conn = new HubConnectionBuilder()
@@ -29,14 +29,14 @@ function buildConnection(): HubConnection {
   });
 
   conn.onreconnected(async () => {
-    for (const id of joinedResourceIds) {
+    for (const id of resourceGroupRefCounts.keys()) {
       try {
         await conn.invoke(JoinResourceGroup, id);
       } catch (err) {
         console.error("Failed to rejoin resource group");
       }
     }
-    if (adminGroupJoined)
+    if (adminGroupRefCount > 0)
       try {
         await conn.invoke(JoinAdminBookingsGroup);
       } catch (err) {
@@ -75,25 +75,40 @@ export async function joinResourceGroup(
   conn: HubConnection,
   resourceId: string,
 ) {
-  await conn.invoke(JoinResourceGroup, resourceId);
-  joinedResourceIds.add(resourceId);
+  const count = resourceGroupRefCounts.get(resourceId) ?? 0;
+  resourceGroupRefCounts.set(resourceId, count + 1);
+  if (count === 0) {
+    await conn.invoke(JoinResourceGroup, resourceId);
+  }
 }
 
 export function leaveResourceGroup(conn: HubConnection, resourceId: string) {
-  joinedResourceIds.delete(resourceId);
-  if (conn.state === HubConnectionState.Connected) {
-    conn.invoke(LeaveResourceGroup, resourceId);
+  const count = resourceGroupRefCounts.get(resourceId) ?? 0;
+  if (count <= 1) {
+    resourceGroupRefCounts.delete(resourceId);
+    if (conn.state === HubConnectionState.Connected) {
+      conn.invoke(LeaveResourceGroup, resourceId);
+    }
+  } else {
+    resourceGroupRefCounts.set(resourceId, count - 1);
   }
 }
 
 export async function joinAdminBookingsGroup(conn: HubConnection) {
-  await conn.invoke(JoinAdminBookingsGroup);
-  adminGroupJoined = true;
+  const count = adminGroupRefCount;
+  adminGroupRefCount += 1;
+  if (count === 0) {
+    await conn.invoke(JoinAdminBookingsGroup);
+  }
 }
 
 export function leaveAdminBookingsGroup(conn: HubConnection) {
-  adminGroupJoined = false;
-  if (conn.state === HubConnectionState.Connected) {
-    conn.invoke(LeaveAdminBookingsGroup);
+  if (adminGroupRefCount <= 1) {
+    adminGroupRefCount = 0;
+    if (conn.state === HubConnectionState.Connected) {
+      conn.invoke(LeaveAdminBookingsGroup);
+    }
+  } else {
+    adminGroupRefCount -= 1;
   }
 }
