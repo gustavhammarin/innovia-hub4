@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { addDaysIso, todayIso } from "../lib/date";
 
-export function useDayRange(maxAdvanceDays?: number) {
+export function useDayRange(maxAdvanceDays?: number, initialDate?: string) {
   const minDate = todayIso();
   const maxDate = maxAdvanceDays != null ? addDaysIso(minDate, maxAdvanceDays) : undefined;
 
@@ -11,7 +11,7 @@ export function useDayRange(maxAdvanceDays?: number) {
     return candidate;
   }
 
-  const [date, setDateState] = useState(minDate);
+  const [date, setDateState] = useState(clamp(initialDate ?? minDate));
 
   useEffect(() => {
     setDateState((d) => clamp(d));

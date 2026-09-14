@@ -37,3 +37,36 @@ export function useResourceBookingUpdates(resourceId: string){
         }
     }, [resourceId, queryClient])
 }
+
+export function useResourcesBookingUpdates(resourceIds: string[]) {
+    const queryClient = useQueryClient();
+    const key = resourceIds.join(",");
+
+    useEffect(() => {
+        if (resourceIds.length === 0) return;
+        const conn = getBookingHubConnection();
+        const idSet = new Set(resourceIds);
+
+        function invalidateIfMine(payload: {resourceId: string}){
+            if (!idSet.has(payload.resourceId)) return;
+            queryClient.invalidateQueries({queryKey: ["availability", payload.resourceId]});
+        }
+
+        conn.on(BookingEvents.BookingCreated, invalidateIfMine);
+        conn.on(BookingEvents.BookingUpdated, invalidateIfMine);
+        conn.on(BookingEvents.BookingCancelled, invalidateIfMine);
+
+        (async () => {
+            await ensureStarted(conn);
+            await Promise.all(resourceIds.map((id) => joinResourceGroup(conn, id)));
+        })();
+
+        return () => {
+            conn.off(BookingEvents.BookingCreated, invalidateIfMine);
+            conn.off(BookingEvents.BookingUpdated, invalidateIfMine);
+            conn.off(BookingEvents.BookingCancelled, invalidateIfMine);
+            resourceIds.forEach((id) => leaveResourceGroup(conn, id));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [key, queryClient])
+}
