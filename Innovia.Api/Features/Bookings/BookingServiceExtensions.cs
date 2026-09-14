@@ -1,4 +1,5 @@
 using Innovia.Api.Common.Auth;
+using Innovia.Api.Features.Realtime;
 
 namespace Innovia.Api.Features.Bookings;
 
@@ -6,38 +7,46 @@ public static class BookingServiceExtensions
 {
     public static IServiceCollection AddBookingsFeature(this IServiceCollection services)
     {
+        services.AddScoped<BookingRulesService>();
+
         services.AddScoped<CreateBooking.Handler>();
         services.AddScoped<CreateBooking.Validator>();
+
         services.AddScoped<UpdateBooking.Handler>();
         services.AddScoped<UpdateBooking.Validator>();
 
         services.AddScoped<GetBookingById.Handler>();
         services.AddScoped<GetBookingById.Validator>();
 
-        services.AddScoped<ListAllBookings.Handler>();
+        services.AddScoped<GetMyBookings.Handler>();
+
+        services.AddScoped<ListBookings.Handler>();
+        services.AddScoped<ListBookings.Validator>();
 
         services.AddScoped<CancelBooking.Handler>();
         services.AddScoped<CancelBooking.Validator>();
 
+        services.AddScoped<IBookingNotifier, SignalRBookingNotifier>();
+        
         return services;
     }
 
     public static IEndpointRouteBuilder MapBookingsEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/bookings").WithTags("Bookings");
+        var group = app.MapGroup("/bookings")
+            .WithTags("Bookings")
+            .AddEndpointFilter<RequireCurrentUserFilter>();
 
         CreateBooking.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
-
         UpdateBooking.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
-
         GetBookingById.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
-
-        ListAllBookings.Endpoint.Map(group)
+        GetMyBookings.Endpoint.Map(group)
+            .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
+        ListBookings.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.AdminOnly);
-
         CancelBooking.Endpoint.Map(group)
             .RequireAuthorization(AuthorizationPolicies.MemberOrAdmin);
 

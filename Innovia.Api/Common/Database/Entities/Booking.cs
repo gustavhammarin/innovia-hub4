@@ -4,6 +4,9 @@ public sealed class Booking
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
+    public string UserNameSnapshot { get; set; } = "Unknown";
+    public string UserEmailSnapshot { get; set; } = "Unknown";
+    public bool UserDeleted { get; set; }
     public Guid ResourceId { get; set; }
     public DateTimeOffset StartsAt { get; set; }
     public DateTimeOffset EndsAt { get; set; }

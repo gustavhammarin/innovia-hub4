@@ -1,5 +1,7 @@
 using Innovia.Api.Common.Auth.Jwt;
+using Innovia.Api.Common.Auth.RefreshTokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Innovia.Api.Common.Auth;
 
@@ -13,18 +15,20 @@ public static class AuthenticationExtensions
             .AddJwtAuthentication(configuration);
 
         services.AddAuthorizationBuilder()
-            .AddPolicy(AuthorizationPolicies.AdminOnly, policy => 
+            .AddPolicy(AuthorizationPolicies.AdminOnly, policy =>
                 policy.RequireRole(Roles.Admin))
             .AddPolicy(AuthorizationPolicies.MemberOnly, policy =>
                 policy.RequireRole(Roles.Member))
-            .AddPolicy(AuthorizationPolicies.MemberOrAdmin, policy => 
-                policy.RequireRole(Roles.Member, Roles.Admin));
+            .AddPolicy(AuthorizationPolicies.MemberOrAdmin, policy =>
+                policy.RequireRole(Roles.Member, Roles.Admin))
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build());
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.AddScoped<RoleSeeder>();
-        services.AddScoped<AdminUserSeeder>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
         return services;
     }

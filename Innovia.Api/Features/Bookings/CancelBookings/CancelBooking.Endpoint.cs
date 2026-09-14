@@ -23,7 +23,7 @@ public static class Endpoint
             var validation = validator.Validate(command);
             if (!validation.IsValid)
                 return validation.ToProblemResult();
-
+            
             var result = await handler.HandleAsync(command, ct);
             return result.ToHttpResponse();
         });

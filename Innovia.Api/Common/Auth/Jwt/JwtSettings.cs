@@ -1,8 +1,10 @@
 namespace Innovia.Api.Common.Auth.Jwt;
 
-public sealed record JwtSettings(
-    string Issuer, 
-    string Audience, 
-    string Secret, 
-    int AccessTokenExpirationMinutes
-);
+public sealed record JwtSettings
+{
+    public string Issuer { get; init; } = string.Empty;
+    public string Audience { get; init; } = string.Empty;
+    public string Secret { get; init; } = string.Empty;
+    public int AccessTokenExpirationMinutes { get; init; }
+    public int RefreshTokenExpirationDays { get; init; }
+}

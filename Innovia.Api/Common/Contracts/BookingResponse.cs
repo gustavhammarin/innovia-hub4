@@ -6,5 +6,6 @@ public sealed record BookingResponse(
     ResourceRef Resource,
     DateTimeOffset StartsAt,
     DateTimeOffset EndsAt,
-    DateTimeOffset CreatedAt
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? CancelledAt
 );

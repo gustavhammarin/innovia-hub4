@@ -2,16 +2,17 @@ using Innovia.Api.Common.Database;
 using Innovia.Api.Common.Result;
 using Innovia.Api.Features.Bookings;
 using Microsoft.EntityFrameworkCore;
-using Innovia.Api.Common.Errors;
 
 namespace Innovia.Api.Features.Bookings.CancelBooking;
 
 public class Handler
 {
     private readonly AppDbContext _dbContext;
-    public Handler(AppDbContext dbContext)
+    private readonly IBookingNotifier _notifier;
+    public Handler(AppDbContext dbContext, IBookingNotifier notifier)
     {
         _dbContext = dbContext;
+        _notifier = notifier;
     }
     public async Task<Result<Response>> HandleAsync(Command command, CancellationToken ct)
     {
@@ -19,20 +20,19 @@ public class Handler
     ;
 
         if (booking is null)
-            return Result<Response>.Fail(
-                Error.NotFound("Booking.NotFound"));
+            return Result<Response>.Fail(BookingErrors.NotFound);
 
         if (booking.UserId != command.UserId && !command.IsAdmin)
-            return Result<Response>.Fail(
-                Error.Forbidden("You are not authorized to cancel this booking."));
+            return Result<Response>.Fail(BookingErrors.NotAuthorizedToUpdate);
 
         if (booking.CancelledAt is not null)
-            return Result<Response>.Fail(
-                Error.Conflict("Booking is already cancelled."));
+            return Result<Response>.Fail(BookingErrors.AlreadyCancelled);
 
         booking.CancelledAt = DateTimeOffset.UtcNow;
 
         await _dbContext.SaveChangesAsync(ct);
+
+        await _notifier.BookingCancelledAsync(booking.ResourceId);
 
         return Result<Response>.Ok(new Response(
             booking.Id,

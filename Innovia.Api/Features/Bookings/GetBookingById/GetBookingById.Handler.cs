@@ -19,27 +19,31 @@ public sealed class Handler
         var booking = await _context.Bookings
             .AsNoTracking()
             .FirstOrDefaultAsync(b => b.Id == command.BookingId, ct);
+        
+        if (booking is null)
+            return Result<BookingResponse>.Fail(BookingErrors.NotFound);
+
+        if (booking.UserId != command.UserId && !command.IsAdmin)
+            return Result<BookingResponse>.Fail(BookingErrors.NotAuthorized);
 
         var resource = await _context.Resources
             .AsNoTracking()
-            .Select(r => new { r.Id, r.Name })
+            .Select(r => new { r.Id, r.Name, r.Description })
             .FirstAsync(r => r.Id == booking.ResourceId, ct);
 
         var user = await _context.Users
             .AsNoTracking()
             .Select(u => new { u.Id, u.Email })
-            .FirstAsync(u => u.Id == booking.UserId, ct);
-
-        if (booking is null)
-            return Result<BookingResponse>.Fail(BookingErrors.NotFound); //lade till ett Booking Error
+            .FirstOrDefaultAsync(u => u.Id == booking.UserId, ct);
 
         var resp = new BookingResponse(
             booking.Id,
-            new UserRef(user.Id, user.Email ?? "Unknown"),
-            new ResourceRef (resource.Id, resource.Name),
+            new UserRef(booking.UserId, user?.Email ?? booking.UserEmailSnapshot),
+            new ResourceRef (resource.Id, resource.Name, resource.Description),
             booking.StartsAt,
             booking.EndsAt,
-            booking.CreatedAt
+            booking.CreatedAt,
+            booking.CancelledAt
         );
 
         return Result<BookingResponse>.Ok(resp);

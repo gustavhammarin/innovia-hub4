@@ -69,6 +69,14 @@ namespace Innovia.Api.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
@@ -114,6 +122,35 @@ namespace Innovia.Api.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Innovia.Api.Common.Database.Entities.AvailabilityRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeOnly>("ClosesAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeOnly>("OpensAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<Guid>("ResourceTypeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SlotDurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceTypeId", "DayOfWeek")
+                        .IsUnique();
+
+                    b.ToTable("AvailabilityRules");
+                });
+
             modelBuilder.Entity("Innovia.Api.Common.Database.Entities.Booking", b =>
                 {
                     b.Property<Guid>("Id")
@@ -135,8 +172,19 @@ namespace Innovia.Api.Migrations
                     b.Property<DateTimeOffset>("StartsAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("UserDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserEmailSnapshot")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("UserNameSnapshot")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -145,6 +193,41 @@ namespace Innovia.Api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Bookings");
+                });
+
+            modelBuilder.Entity("Innovia.Api.Common.Database.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("RevokedByTokenId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Innovia.Api.Common.Database.Entities.Resource", b =>
@@ -156,12 +239,19 @@ namespace Innovia.Api.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("ResourceTypeId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -178,6 +268,16 @@ namespace Innovia.Api.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MaxAdvanceDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(90);
+
+                    b.Property<int>("MaxDurationMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(480);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -291,6 +391,15 @@ namespace Innovia.Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Innovia.Api.Common.Database.Entities.AvailabilityRule", b =>
+                {
+                    b.HasOne("Innovia.Api.Common.Database.Entities.ResourceType", null)
+                        .WithMany()
+                        .HasForeignKey("ResourceTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Innovia.Api.Common.Database.Entities.Booking", b =>
                 {
                     b.HasOne("Innovia.Api.Common.Database.Entities.Resource", null)
@@ -298,7 +407,10 @@ namespace Innovia.Api.Migrations
                         .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
+            modelBuilder.Entity("Innovia.Api.Common.Database.Entities.RefreshToken", b =>
+                {
                     b.HasOne("Innovia.Api.Common.Database.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")

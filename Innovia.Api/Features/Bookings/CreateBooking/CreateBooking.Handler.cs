@@ -10,14 +10,22 @@ namespace Innovia.Api.Features.Bookings.CreateBooking;
 public sealed class Handler
 {
     private readonly AppDbContext _context;
+    private readonly BookingRulesService _bookingRulesService;
+    private readonly IBookingNotifier _notifier;
 
-    public Handler(AppDbContext context)
+    public Handler(AppDbContext context, BookingRulesService bookingRulesService, IBookingNotifier notifier)
     {
         _context = context;
+        _bookingRulesService = bookingRulesService;
+        _notifier = notifier;
     }
 
     public async Task<Result<Response>> HandleAsync(Command cmd, CancellationToken ct)
     {
+        var ruleViolationError = await _bookingRulesService.ValidateAsync(cmd.ResourceId, cmd.StartsAt, cmd.EndsAt, ct);
+        if (ruleViolationError is not null)
+            return Result<Response>.Fail(ruleViolationError);
+            
         var booking = new Booking
         {
             Id = Guid.CreateVersion7(),
@@ -27,6 +35,10 @@ public sealed class Handler
             EndsAt = cmd.EndsAt,
             CreatedAt = DateTimeOffset.UtcNow
         };
+
+        var bookingUser = await _context.Users.AsNoTracking().FirstAsync(u => u.Id == cmd.UserId, ct);
+        booking.UserNameSnapshot = $"{bookingUser.FirstName} {bookingUser.LastName}".Trim();
+        booking.UserEmailSnapshot = bookingUser.Email ?? "Unknown";
 
         await _context.Bookings.AddAsync(booking, ct);
 
@@ -43,21 +55,18 @@ public sealed class Handler
             return Result<Response>.Fail(BookingErrors.InvalidReference());
         }
 
+        await _notifier.BookingCreatedAsync(booking.ResourceId, ct);
+
         var resource = await _context.Resources
             .AsNoTracking()
-            .Select(r => new {r.Id, r.Name})
+            .Select(r => new {r.Id, r.Name, r.Description})
             .FirstAsync(r => r.Id == booking.ResourceId, ct);
-        
-        var user = await _context.Users
-            .AsNoTracking()
-            .Select(u => new {u.Id, u.Email})
-            .FirstAsync(u => u.Id == booking.UserId, ct);
         
         var resp = new Response
         (
             booking.Id,
-            new UserRef(user.Id, user.Email ?? "Unknown"),
-            new ResourceRef(resource.Id, resource.Name),
+            new UserRef(booking.UserId, booking.UserEmailSnapshot),
+            new ResourceRef(resource.Id, resource.Name, resource.Description),
             booking.StartsAt,
             booking.EndsAt,
             booking.CreatedAt

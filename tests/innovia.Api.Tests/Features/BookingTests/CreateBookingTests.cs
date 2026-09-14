@@ -21,14 +21,18 @@ public class CreateBookingTests
         {
             Id = Guid.CreateVersion7(),
             UserName = $"{Guid.NewGuid()}@test.com",
-            Email = $"{Guid.NewGuid()}@test.com"
+            Email = $"{Guid.NewGuid()}@test.com",
+            FirstName = "Test",
+            LastName = "User"
         };
 
         var resourceType = new ResourceType
         {
             Id = Guid.CreateVersion7(),
             Name = "Room",
-            CreatedAt = DateTimeOffset.UtcNow
+            CreatedAt = DateTimeOffset.UtcNow,
+            MaxDurationMinutes = 480,
+            MaxAdvanceDays = 90
         };
 
         var resource = new Resource
@@ -36,23 +40,46 @@ public class CreateBookingTests
             Id = Guid.CreateVersion7(),
             Name = "Meeting Room 1",
             CreatedAt = DateTimeOffset.UtcNow,
-            ResourceTypeId = resourceType.Id
+            ResourceTypeId = resourceType.Id,
+            Description = string.Empty
         };
+
+        var availabilityRules = Enum.GetValues<DayOfWeek>()
+            .Select(dayOfWeek => new AvailabilityRule
+            {
+                Id = Guid.CreateVersion7(),
+                ResourceTypeId = resourceType.Id,
+                DayOfWeek = dayOfWeek,
+                OpensAt = new TimeOnly(0, 0),
+                ClosesAt = new TimeOnly(23, 59),
+                SlotDurationMinutes = 60
+            });
 
         context.Users.Add(user);
         context.ResourceTypes.Add(resourceType);
         context.Resources.Add(resource);
+        context.AvailabilityRules.AddRange(availabilityRules);
         await context.SaveChangesAsync();
 
         return (user.Id, resource.Id);
     }
+
+    private sealed class NoopBookingNotifier : IBookingNotifier
+    {
+        public Task BookingCreatedAsync(Guid resourceId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task BookingCancelledAsync(Guid resourceId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task BookingUpdatedAsync(Guid oldResourceId, Guid newResourceId, CancellationToken ct = default) => Task.CompletedTask;
+    }
+
+    private static Handler CreateHandler(AppDbContext context) =>
+        new(context, new BookingRulesService(context), new NoopBookingNotifier());
 
     [Fact]
     public async Task Should_Succeed_When_Booking_Valid_Time_On_Resource()
     {
         await using var context = _fixture.CreateDbContext();
         var (userId, resourceId) = await SeedUserAndResourceAsync(context);
-        var handler = new Handler(context);
+        var handler = CreateHandler(context);
 
         var startsAt = DateTimeOffset.UtcNow.AddHours(1);
         var command = new Command(resourceId, userId, startsAt, startsAt.AddHours(1));
@@ -70,7 +97,7 @@ public class CreateBookingTests
     {
         await using var context = _fixture.CreateDbContext();
         var (userId, resourceId) = await SeedUserAndResourceAsync(context);
-        var handler = new Handler(context);
+        var handler = CreateHandler(context);
 
         var startsAt = DateTimeOffset.UtcNow.AddHours(2);
         var existing = new Command(resourceId, userId, startsAt, startsAt.AddHours(1));
@@ -89,7 +116,7 @@ public class CreateBookingTests
     {
         await using var context = _fixture.CreateDbContext();
         var (userId, resourceId) = await SeedUserAndResourceAsync(context);
-        var handler = new Handler(context);
+        var handler = CreateHandler(context);
 
         var startsAt = DateTimeOffset.UtcNow.AddHours(3);
         var first = new Command(resourceId, userId, startsAt, startsAt.AddHours(1));
@@ -108,7 +135,7 @@ public class CreateBookingTests
         await using var context = _fixture.CreateDbContext();
         var (userId, resourceId1) = await SeedUserAndResourceAsync(context);
         var (_, resourceId2) = await SeedUserAndResourceAsync(context);
-        var handler = new Handler(context);
+        var handler = CreateHandler(context);
 
         var startsAt = DateTimeOffset.UtcNow.AddHours(4);
         var first = new Command(resourceId1, userId, startsAt, startsAt.AddHours(1));
@@ -129,12 +156,14 @@ public class CreateBookingTests
         {
             Id = Guid.CreateVersion7(),
             UserName = $"{Guid.NewGuid()}@test.com",
-            Email = $"{Guid.NewGuid()}@test.com"
+            Email = $"{Guid.NewGuid()}@test.com",
+            FirstName = "Test",
+            LastName = "User"
         };
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        var handler = new Handler(context);
+        var handler = CreateHandler(context);
         var startsAt = DateTimeOffset.UtcNow.AddHours(5);
         var command = new Command(Guid.CreateVersion7(), user.Id, startsAt, startsAt.AddHours(1));
 

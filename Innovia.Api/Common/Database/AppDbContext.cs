@@ -11,6 +11,8 @@ public class AppDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, G
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<Resource> Resources => Set<Resource>();
     public DbSet<ResourceType> ResourceTypes => Set<ResourceType>();
+    public DbSet<AvailabilityRule> AvailabilityRules => Set<AvailabilityRule>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -18,7 +20,8 @@ public class AppDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, G
         builder.Entity<Booking>(b =>
         {
             b.HasKey(x => x.Id);
-            b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.UserId);
+            // UserId is retained as a historical reference after a hard user delete.
+            b.HasIndex(x => x.UserId);
             b.HasOne<Resource>().WithMany().HasForeignKey(x => x.ResourceId);
         });
 
@@ -26,6 +29,28 @@ public class AppDbContext: IdentityDbContext<ApplicationUser, ApplicationRole, G
         {
             r.HasKey(x => x.Id);
             r.HasOne<ResourceType>().WithMany().HasForeignKey(x => x.ResourceTypeId);
+        });
+
+        builder.Entity<ResourceType>(rt =>
+        {
+            rt.Property(x => x.MaxDurationMinutes).HasDefaultValue(480);
+            rt.Property(x => x.MaxAdvanceDays).HasDefaultValue(90);
+        });
+
+        builder.Entity<AvailabilityRule>(a =>
+        {
+            a.HasKey(x => x.Id);
+            a.HasOne<ResourceType>().WithMany().HasForeignKey(x => x.ResourceTypeId);
+            a.HasIndex(x => new { x.ResourceTypeId, x.DayOfWeek }).IsUnique();
+            a.Property(x => x.OpensAt).HasColumnType("time without time zone");
+            a.Property(x => x.ClosesAt).HasColumnType("time without time zone");
+        });
+
+        builder.Entity<RefreshToken>(rt =>
+        {
+            rt.HasKey(x => x.Id);
+            rt.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.UserId);
+            rt.HasIndex(x => x.TokenHash).IsUnique();
         });
     }
 }
