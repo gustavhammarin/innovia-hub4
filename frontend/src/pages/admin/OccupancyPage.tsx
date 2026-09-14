@@ -14,6 +14,7 @@ import {
 } from "../../hooks/useOccupancy";
 import { useAdminBookingUpdates } from "../../hooks/useAdminBookingsUpdates";
 import { useResourceStatusUpdates } from "../../hooks/useResourceStatusUpdates";
+import { MobileDatePicker } from "../../components/MobileDatePicker";
 
 const COLORS = ["#1d4ed8", "#7c3aed", "#16a34a", "#0ea5e9", "#64748b"];
 
@@ -89,28 +90,8 @@ export function OccupancyPage() {
 
       {view === "range" && (
         <div className="flex flex-wrap gap-4 mb-4 items-end">
-          <div className="w-full sm:w-auto">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Från
-            </label>
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="w-full sm:w-auto min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
-          <div className="w-full sm:w-auto">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Till
-            </label>
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="w-full sm:w-auto min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
+          <MobileDatePicker label="Från" value={from} onChange={setFrom} maxDate={to || undefined} />
+          <MobileDatePicker label="Till" value={to} onChange={setTo} minDate={from || undefined} />
         </div>
       )}
 
