@@ -56,14 +56,14 @@ export function MobileDatePicker({
   });
 
   return (
-    <div className="w-full sm:w-auto">
+    <div className="flex-1 min-w-0">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
         {label}
       </label>
       <button
         type="button"
         onClick={openSheet}
-        className="w-full sm:w-auto min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-left text-base sm:text-sm text-gray-900 dark:text-gray-100"
+        className="w-full min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-left text-base sm:text-sm text-gray-900 dark:text-gray-100 truncate"
       >
         {value ? formatDisplay(value) : <span className="text-gray-400">Välj datum</span>}
       </button>

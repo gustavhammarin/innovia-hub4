@@ -11,16 +11,18 @@ export function ResourceTypesAdminPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-          Resurstyper
-        </h1>
-        <button
-          onClick={() => setCreating(true)}
-          className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
-        >
-          + Ny resurstyp
-        </button>
+      <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-1 pb-3 mb-1">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            Resurstyper
+          </h1>
+          <button
+            onClick={() => setCreating(true)}
+            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
+          >
+            + Ny resurstyp
+          </button>
+        </div>
       </div>
 
       <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">

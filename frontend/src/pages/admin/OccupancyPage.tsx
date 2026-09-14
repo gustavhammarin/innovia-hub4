@@ -69,31 +69,33 @@ export function OccupancyPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-        Beläggning
-      </h1>
+      <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-1 pb-3 mb-1">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Beläggning
+        </h1>
 
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setView("current")}
-          className={`text-sm font-medium px-3 py-1 rounded-md ${view === "current" ? "bg-indigo-600 text-white" : "text-gray-500"}`}
-        >
-          Just nu
-        </button>
-        <button
-          onClick={() => setView("range")}
-          className={`text-sm font-medium px-3 py-1 rounded-md ${view === "range" ? "bg-indigo-600 text-white" : "text-gray-500"}`}
-        >
-          Datumspann
-        </button>
-      </div>
-
-      {view === "range" && (
-        <div className="flex flex-wrap gap-4 mb-4 items-end">
-          <MobileDatePicker label="Från" value={from} onChange={setFrom} maxDate={to || undefined} />
-          <MobileDatePicker label="Till" value={to} onChange={setTo} minDate={from || undefined} />
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setView("current")}
+            className={`text-sm font-medium px-3 py-1 rounded-md ${view === "current" ? "bg-indigo-600 text-white" : "text-gray-500"}`}
+          >
+            Just nu
+          </button>
+          <button
+            onClick={() => setView("range")}
+            className={`text-sm font-medium px-3 py-1 rounded-md ${view === "range" ? "bg-indigo-600 text-white" : "text-gray-500"}`}
+          >
+            Datumspann
+          </button>
         </div>
-      )}
+
+        {view === "range" && (
+          <div className="flex gap-3 items-end">
+            <MobileDatePicker label="Från" value={from} onChange={setFrom} maxDate={to || undefined} />
+            <MobileDatePicker label="Till" value={to} onChange={setTo} minDate={from || undefined} />
+          </div>
+        )}
+      </div>
 
       {isLoading && <p className="text-gray-500">Laddar beläggning...</p>}
 
