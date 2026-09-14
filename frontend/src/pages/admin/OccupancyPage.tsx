@@ -88,8 +88,8 @@ export function OccupancyPage() {
       </div>
 
       {view === "range" && (
-        <div className="flex gap-4 mb-4 items-end">
-          <div>
+        <div className="flex flex-wrap gap-4 mb-4 items-end">
+          <div className="w-full sm:w-auto">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Från
             </label>
@@ -97,10 +97,10 @@ export function OccupancyPage() {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+              className="w-full sm:w-auto min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-gray-100"
             />
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Till
             </label>
@@ -108,7 +108,7 @@ export function OccupancyPage() {
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+              className="w-full sm:w-auto min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-gray-100"
             />
           </div>
         </div>
@@ -128,7 +128,14 @@ export function OccupancyPage() {
           <div style={{ width: "100%", height: 320 }}>
             <ResponsiveContainer>
               <BarChart data={chartData} margin={{ bottom: 24 }}>
-                <XAxis dataKey="name" height={50} interval={0} />
+                <XAxis
+                  dataKey="name"
+                  height={70}
+                  interval={0}
+                  angle={-35}
+                  textAnchor="end"
+                  tick={{ fontSize: 11 }}
+                />
                 <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <Tooltip cursor={false} content={<CustomTooltip />} />
                 <Bar
@@ -147,7 +154,7 @@ export function OccupancyPage() {
       )}
 
       {!isLoading && view === "range" && (!from || !to) && (
-        <p className="text-sm text-gray-400">
+        <p className="hidden sm:block text-sm text-gray-400">
           Välj ett datumspann för att se beläggning.
         </p>
       )}

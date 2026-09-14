@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { StatusBadge } from "../../components/StatusBadge";
 import { ResourceTypeFilter } from "../../components/ResourceTypeFilter";
 import { ApiError } from "../../api/client";
@@ -15,6 +15,113 @@ import {
   filterByResourceType,
 } from "../../lib/resourceGrouping";
 import { useResourceStatusUpdates } from "../../hooks/useResourceStatusUpdates";
+
+function MenuItem({
+  onClick,
+  className,
+  children,
+}: {
+  onClick: () => void;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`block w-full px-3 py-2 text-left text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed ${className ?? "text-gray-700 dark:text-gray-200"}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function ResourceActions({
+  resource,
+  onBook,
+  onEdit,
+  onAction,
+  align = "right",
+}: {
+  resource: Resource;
+  onBook: () => void;
+  onEdit: () => void;
+  onAction: (action: ResourceStatusAction) => void;
+  align?: "left" | "right";
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [open]);
+
+  function run(fn: () => void) {
+    fn();
+    setOpen(false);
+  }
+
+  return (
+    <div ref={ref} className="relative inline-block text-left">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        Hantera ▾
+      </button>
+      {open && (
+        <div
+          className={`absolute z-10 mt-1 w-44 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg py-1 ${
+            align === "right" ? "right-0" : "left-0"
+          }`}
+        >
+          <MenuItem
+            onClick={() => run(onBook)}
+            className={
+              resource.status !== "Online"
+                ? "text-gray-300 dark:text-gray-600 cursor-not-allowed pointer-events-none"
+                : "text-indigo-600 dark:text-indigo-400"
+            }
+          >
+            Boka
+          </MenuItem>
+          <MenuItem onClick={() => run(onEdit)} className="text-indigo-600 dark:text-indigo-400">
+            Redigera
+          </MenuItem>
+          {resource.status !== "Online" && resource.status !== "Archived" && (
+            <MenuItem onClick={() => run(() => onAction("online"))} className="text-green-600 dark:text-green-400">
+              Online
+            </MenuItem>
+          )}
+          {resource.status !== "Maintenance" && resource.status !== "Archived" && (
+            <MenuItem onClick={() => run(() => onAction("maintenance"))} className="text-amber-600 dark:text-amber-400">
+              Underhåll
+            </MenuItem>
+          )}
+          {resource.status !== "Offline" && resource.status !== "Archived" && (
+            <MenuItem onClick={() => run(() => onAction("offline"))} className="text-gray-500 dark:text-gray-400">
+              Offline
+            </MenuItem>
+          )}
+          {resource.status === "Archived" ? (
+            <MenuItem onClick={() => run(() => onAction("unarchive"))} className="text-indigo-600 dark:text-indigo-400">
+              Återställ
+            </MenuItem>
+          ) : (
+            <MenuItem onClick={() => run(() => onAction("archive"))} className="text-red-600 dark:text-red-400">
+              Arkivera
+            </MenuItem>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ResourcesAdminPage() {
   useResourceStatusUpdates();
@@ -49,7 +156,7 @@ export function ResourcesAdminPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
           Resurser (admin)
         </h1>
@@ -70,7 +177,7 @@ export function ResourcesAdminPage() {
       {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {resourcesQuery.isLoading && <p className="text-gray-500">Laddar...</p>}
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm">
           <thead>
             <tr className="text-left text-xs font-semibold uppercase text-gray-400">
@@ -97,64 +204,13 @@ export function ResourcesAdminPage() {
                 <td className="px-4 py-3">
                   <StatusBadge status={resource.status} />
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-end gap-2 flex-wrap">
-                    <button
-                      onClick={() => setBookingResource(resource)}
-                      disabled={resource.status !== "Online"}
-                      className="text-indigo-600 hover:text-indigo-500 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      Boka
-                    </button>
-                    <button
-                      onClick={() => setEditing(resource)}
-                      className="text-indigo-600 hover:text-indigo-500 font-medium"
-                    >
-                      Redigera
-                    </button>
-                    {resource.status !== "Online" &&
-                      resource.status !== "Archived" && (
-                        <button
-                          onClick={() => runAction(resource.id, "online")}
-                          className="text-green-600 hover:text-green-500 font-medium"
-                        >
-                          Online
-                        </button>
-                      )}
-                    {resource.status !== "Maintenance" &&
-                      resource.status !== "Archived" && (
-                        <button
-                          onClick={() => runAction(resource.id, "maintenance")}
-                          className="text-amber-600 hover:text-amber-500 font-medium"
-                        >
-                          Underhåll
-                        </button>
-                      )}
-                    {resource.status !== "Offline" &&
-                      resource.status !== "Archived" && (
-                        <button
-                          onClick={() => runAction(resource.id, "offline")}
-                          className="text-gray-500 hover:text-gray-700 font-medium"
-                        >
-                          Offline
-                        </button>
-                      )}
-                    {resource.status === "Archived" ? (
-                      <button
-                        onClick={() => runAction(resource.id, "unarchive")}
-                        className="text-indigo-600 hover:text-indigo-500 font-medium"
-                      >
-                        Återställ
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => runAction(resource.id, "archive")}
-                        className="text-red-600 hover:text-red-500 font-medium"
-                      >
-                        Arkivera
-                      </button>
-                    )}
-                  </div>
+                <td className="px-4 py-3 text-right">
+                  <ResourceActions
+                    resource={resource}
+                    onBook={() => setBookingResource(resource)}
+                    onEdit={() => setEditing(resource)}
+                    onAction={(action) => runAction(resource.id, action)}
+                  />
                 </td>
               </tr>
             ))}
@@ -162,6 +218,44 @@ export function ResourcesAdminPage() {
         </table>
         {resources.length === 0 && !resourcesQuery.isLoading && (
           <p className="text-sm text-gray-500 px-4 py-6">
+            Inga resurser av den valda typen.
+          </p>
+        )}
+      </div>
+
+      <div className="md:hidden -mx-4 px-4 flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {resources.map((resource) => (
+          <div
+            key={resource.id}
+            className="snap-center shrink-0 w-[82vw] max-w-xs rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">
+                  {resource.name}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {resource.description}
+                </div>
+              </div>
+              <StatusBadge status={resource.status} />
+            </div>
+            <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+              {typeNameById.get(resource.resourceTypeId) ?? "-"}
+            </div>
+            <div className="mt-3">
+              <ResourceActions
+                resource={resource}
+                onBook={() => setBookingResource(resource)}
+                onEdit={() => setEditing(resource)}
+                onAction={(action) => runAction(resource.id, action)}
+                align="left"
+              />
+            </div>
+          </div>
+        ))}
+        {resources.length === 0 && !resourcesQuery.isLoading && (
+          <p className="text-sm text-gray-500 px-1 py-6">
             Inga resurser av den valda typen.
           </p>
         )}
