@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ApiError } from "../../api/client";
 import type { Booking } from "../../api/types";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { MobileDatePicker } from "../../components/MobileDatePicker";
 import { useAllBookings } from "../../hooks/useBookings";
 import { useCancelBooking } from "../../hooks/useBookingMutations";
 import { sortByStartDescending } from "../../lib/bookingGrouping";
@@ -41,28 +42,8 @@ export function BookingsAdminPage() {
       </h1>
 
       <div className="flex flex-wrap gap-4 mb-4 items-end">
-        <div className="w-full sm:w-auto">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Från
-          </label>
-          <input
-            type="date"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            className="w-full sm:w-auto min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-gray-100"
-          />
-        </div>
-        <div className="w-full sm:w-auto">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Till
-          </label>
-          <input
-            type="date"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            className="w-full sm:w-auto min-h-11 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-gray-100"
-          />
-        </div>
+        <MobileDatePicker label="Från" value={from} onChange={setFrom} maxDate={to || undefined} />
+        <MobileDatePicker label="Till" value={to} onChange={setTo} minDate={from || undefined} />
         {(from || to) && (
           <button
             onClick={() => {

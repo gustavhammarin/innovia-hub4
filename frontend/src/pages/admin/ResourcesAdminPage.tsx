@@ -156,23 +156,26 @@ export function ResourcesAdminPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-          Resurser (admin)
-        </h1>
-        <button
-          onClick={() => setCreating(true)}
-          className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
-        >
-          + Ny resurs
-        </button>
-      </div>
+      <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-1 pb-3 mb-1">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            Resurser (admin)
+          </h1>
+          <button
+            onClick={() => setCreating(true)}
+            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
+          >
+            + Ny resurs
+          </button>
+        </div>
 
-      <ResourceTypeFilter
-        resourceTypes={typesQuery.data ?? []}
-        selectedTypeId={selectedTypeId}
-        onChange={setSelectedTypeId}
-      />
+        <ResourceTypeFilter
+          resourceTypes={typesQuery.data ?? []}
+          selectedTypeId={selectedTypeId}
+          onChange={setSelectedTypeId}
+          className="mb-0"
+        />
+      </div>
 
       {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
       {resourcesQuery.isLoading && <p className="text-gray-500">Laddar...</p>}
@@ -223,11 +226,11 @@ export function ResourcesAdminPage() {
         )}
       </div>
 
-      <div className="md:hidden -mx-4 px-4 flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="md:hidden space-y-3">
         {resources.map((resource) => (
           <div
             key={resource.id}
-            className="snap-center shrink-0 w-[82vw] max-w-xs rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4"
+            className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4"
           >
             <div className="flex items-start justify-between gap-2">
               <div>
