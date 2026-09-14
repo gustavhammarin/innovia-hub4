@@ -14,6 +14,7 @@ import {
 } from "../../hooks/useOccupancy";
 import { useAdminBookingUpdates } from "../../hooks/useAdminBookingsUpdates";
 import { useResourceStatusUpdates } from "../../hooks/useResourceStatusUpdates";
+import { MobileDatePicker } from "../../components/MobileDatePicker";
 
 const COLORS = ["#1d4ed8", "#7c3aed", "#16a34a", "#0ea5e9", "#64748b"];
 
@@ -68,51 +69,33 @@ export function OccupancyPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-        Beläggning
-      </h1>
+      <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-4 pb-3 mb-1">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Beläggning
+        </h1>
 
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setView("current")}
-          className={`text-sm font-medium px-3 py-1 rounded-md ${view === "current" ? "bg-indigo-600 text-white" : "text-gray-500"}`}
-        >
-          Just nu
-        </button>
-        <button
-          onClick={() => setView("range")}
-          className={`text-sm font-medium px-3 py-1 rounded-md ${view === "range" ? "bg-indigo-600 text-white" : "text-gray-500"}`}
-        >
-          Datumspann
-        </button>
-      </div>
-
-      {view === "range" && (
-        <div className="flex gap-4 mb-4 items-end">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Från
-            </label>
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Till
-            </label>
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </div>
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setView("current")}
+            className={`text-sm font-medium px-3 py-1 rounded-md ${view === "current" ? "bg-indigo-600 text-white" : "text-gray-500"}`}
+          >
+            Just nu
+          </button>
+          <button
+            onClick={() => setView("range")}
+            className={`text-sm font-medium px-3 py-1 rounded-md ${view === "range" ? "bg-indigo-600 text-white" : "text-gray-500"}`}
+          >
+            Datumspann
+          </button>
         </div>
-      )}
+
+        {view === "range" && (
+          <div className="flex gap-3 items-end">
+            <MobileDatePicker label="Från" value={from} onChange={setFrom} maxDate={to || undefined} />
+            <MobileDatePicker label="Till" value={to} onChange={setTo} minDate={from || undefined} />
+          </div>
+        )}
+      </div>
 
       {isLoading && <p className="text-gray-500">Laddar beläggning...</p>}
 
@@ -128,7 +111,14 @@ export function OccupancyPage() {
           <div style={{ width: "100%", height: 320 }}>
             <ResponsiveContainer>
               <BarChart data={chartData} margin={{ bottom: 24 }}>
-                <XAxis dataKey="name" height={50} interval={0} />
+                <XAxis
+                  dataKey="name"
+                  height={70}
+                  interval={0}
+                  angle={-35}
+                  textAnchor="end"
+                  tick={{ fontSize: 11 }}
+                />
                 <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <Tooltip cursor={false} content={<CustomTooltip />} />
                 <Bar
@@ -147,7 +137,7 @@ export function OccupancyPage() {
       )}
 
       {!isLoading && view === "range" && (!from || !to) && (
-        <p className="text-sm text-gray-400">
+        <p className="hidden sm:block text-sm text-gray-400">
           Välj ett datumspann för att se beläggning.
         </p>
       )}

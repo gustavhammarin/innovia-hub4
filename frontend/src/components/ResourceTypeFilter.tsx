@@ -4,13 +4,15 @@ export function ResourceTypeFilter({
   resourceTypes,
   selectedTypeId,
   onChange,
+  className = "mb-6",
 }: {
   resourceTypes: ResourceType[];
   selectedTypeId: string | null;
   onChange: (typeId: string | null) => void;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <div className={`flex flex-wrap gap-2 ${className}`}>
       <button
         onClick={() => onChange(null)}
         className={`rounded-full px-3 py-1 text-sm font-medium border transition-colors ${
