@@ -11,6 +11,7 @@ using Innovia.Api.Features.Realtime;
 using Innovia.Api.Features.Resources;
 using Innovia.Api.Features.ResourceTypes;
 using Innovia.Api.Features.Users;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -52,6 +53,13 @@ builder.Services.AddOpenApi(options =>
     };
 });
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 builder.Services.AddCors(options =>
 {
     var frontendOrigin = builder.Configuration["Cors:FrontendOrigin"] ?? "http://localhost:5173";
@@ -77,6 +85,8 @@ builder.Services.AddOccupancyFeature();
 builder.Services.AddUsersFeature();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 await app.ApplyMigrationsAsync();
 await app.SeedAppDataAsync();

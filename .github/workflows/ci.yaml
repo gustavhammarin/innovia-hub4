@@ -16,7 +16,7 @@ jobs:
           dotnet-version: "10.0.x"
       - run: dotnet restore Innovia.slnx
       - run: dotnet build Innovia.slnx --no-restore -c Release
-      - run: dotnet test tests/innovia.Api.Tests/Innovia.Api.Tests.csproj --no-build -c Release
+      - run: dotnet test tests/Innovia.Api.Tests/Innovia.Api.Tests.csproj --no-build -c Release
 
   frontend:
     runs-on: ubuntu-latest
