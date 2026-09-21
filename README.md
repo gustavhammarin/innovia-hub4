@@ -62,7 +62,7 @@ Handlers returnerar `Result` / `Result<T>` (se `Common/Result/`) istället för 
 ### Autentisering och auktorisering
 
 - Inloggning sker mot ASP.NET Core Identity (`UserManager`/`SignInManager`), med lösenordslåsning (lockout) vid upprepade felaktiga inloggningsförsök.
-- Vid lyckad inloggning utfärdas en **JWT access token** (kort livslängd, default 90 min) och en **refresh token** (roterande, hash:as vid lagring, default 1 dag). Båda skickas som separata `HttpOnly`-cookies, inte i JSON-svaret – detta skyddar mot att tokens läses av JavaScript (XSS).
+- Vid lyckad inloggning utfärdas en **JWT access token** (kort livslängd, default 15 min) och en **refresh token** (roterande, hash:as vid lagring, default 1 dag). Båda skickas som separata `HttpOnly`-cookies, inte i JSON-svaret – detta skyddar mot att tokens läses av JavaScript (XSS). Frontendens API-klient fångar 401 pga utgången access token och anropar `/auth/refresh` automatiskt innan requesten görs om, så kort livslängd på access token märks inte av användaren.
 - Cookies sätts med `SameSite=Strict` och `Secure` (i produktion), vilket skyddar mot CSRF utan att behöva separata CSRF-tokens.
 - Refresh tokens roteras vid varje användning; om en redan använd/återkallad refresh token återanvänds så återkallas hela tokenfamiljen (skydd mot replay-attacker om en token skulle läcka).
 - Auktorisering styrs via policys (`AdminOnly`, `MemberOnly`, `MemberOrAdmin`, se `Common/Auth/AuthorizationPolicies.cs`) och en **fallback-policy som kräver autentisering** på alla endpoints som inte uttryckligen är anonyma. Admin-only-anrop kontrolleras dessutom explicit i handlers där en admin kan agera å en annan användares vägnar (t.ex. skapa bokning åt någon annan).

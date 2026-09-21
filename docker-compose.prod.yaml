@@ -27,7 +27,7 @@ services:
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
       Jwt__Secret: ${JWT_SECRET}
-      Jwt__AccessTokenExpirationMinutes: "90"
+      Jwt__AccessTokenExpirationMinutes: "15"
       Jwt__RefreshTokenExpirationDays: "1"
       AdminUser__Email: ${ADMIN_EMAIL}
       AdminUser__Password: ${ADMIN_PASSWORD}

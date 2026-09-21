@@ -1,5 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? "https://localhost:7229";
 
+const AUTH_ENDPOINTS_WITHOUT_RETRY = ["/auth/login", "/auth/register", "/auth/refresh", "/auth/logout"];
+
 export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -8,9 +10,27 @@ export class ApiError extends Error {
   }
 }
 
+let refreshPromise: Promise<boolean> | null = null;
+
+function refreshAccessToken(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = fetch(`${BASE_URL}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+    })
+      .then((res) => res.ok)
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
 async function request<T>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retryOn401 = true
 ): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
@@ -20,6 +40,13 @@ async function request<T>(
       ...options.headers,
     },
   });
+
+  if (res.status === 401 && retryOn401 && !AUTH_ENDPOINTS_WITHOUT_RETRY.includes(path)) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      return request<T>(path, options, false);
+    }
+  }
 
   if (!res.ok) {
     let message = res.statusText;
