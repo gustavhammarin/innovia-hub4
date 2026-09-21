@@ -70,6 +70,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd ${{ secrets.DEPLOY_PATH }}
             export IMAGE_TAG=${{ github.sha }}
             docker compose -f docker-compose.prod.yaml pull
