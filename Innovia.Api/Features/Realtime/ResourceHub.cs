@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Innovia.Api.Features.Realtime;
 
+[Authorize]
 public class ResourceHub : Hub
 {
     public Task JoinResourceStatusGroup () => 
