@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: innovia_user
+      POSTGRES_PASSWORD: innovia_pass
+      POSTGRES_DB: innovia_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - innovia_pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U innovia_user -d innovia_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    restart: unless-stopped
+    working_dir: /src/Innovia.Api
+    command: dotnet watch run --no-launch-profile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      DOTNET_USE_POLLING_FILE_WATCHER: "1"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=innovia_db;Username=innovia_user;Password=innovia_pass"
+      Jwt__Issuer: "http://localhost:5123"
+      Jwt__Audience: "http://localhost:5173"
+      Jwt__Secret: "dev-only-secret-do-not-use-in-prod-please"
+      Jwt__AccessTokenExpirationMinutes: "15"
+      Jwt__RefreshTokenExpirationDays: "1"
+      AdminUser__Email: "admin@admin.com"
+      AdminUser__Password: "Password123!"
+      Cors__FrontendOrigin: "http://localhost:5173"
+    ports:
+      - "5123:8080"
+    volumes:
+      - ./Innovia.Api:/src/Innovia.Api
+      - innovia_nuget_cache:/root/.nuget/packages
+      - api_bin:/src/Innovia.Api/bin
+      - api_obj:/src/Innovia.Api/obj
+
+  frontend:
+    image: node:22-alpine
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - api
+    environment:
+      VITE_API_URL: "http://localhost:5123"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+
+volumes:
+  innovia_pgdata_dev:
+  innovia_nuget_cache:
+  api_bin:
+  api_obj:
+  frontend_node_modules:

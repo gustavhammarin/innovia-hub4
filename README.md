@@ -127,7 +127,23 @@ Kärnentiteterna (`Innovia.Api/Common/Database/Entities/`):
 
 ## Kom igång lokalt
 
-### Förutsättningar
+Två sätt att köra lokalt: allt i Docker (`docker-compose.dev.yaml`, enklast) eller native (.NET/Node installerat lokalt, snabbare edit-loop för vissa). Kör inte båda samtidigt — de delar port `5432`/`5123`/`5173`.
+
+### Alternativ A: allt i Docker
+
+```bash
+docker compose -f docker-compose.dev.yaml up
+```
+
+Startar Postgres, API (`dotnet watch run`, hot reload vid filändring) och frontend (Vite dev-server) i containrar, allt över vanlig HTTP på samma portar som nedan (`5123`/`5173`). Ingen `.env`-fil behövs — alla dev-värden ligger inlinead i `docker-compose.dev.yaml`.
+
+Fördelen: både API och frontend körs konsekvent över HTTP på `localhost`, så auth-cookien fungerar med `SameSite=Strict` utan att behöva växla mellan HTTP/HTTPS-profiler manuellt — det är annars den vanligaste orsaken till att cookien "försvinner" i dev (schemeful same-site: en `https://localhost:7229`-cookie skickas inte med av en `http://localhost:5173`-request, trots att det är samma host).
+
+Databasen ligger i en egen Docker-volym (`innovia_pgdata_dev`), separat från alternativ B nedan.
+
+### Alternativ B: native
+
+**Förutsättningar**
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/)
 - [Node.js 22](https://nodejs.org/) + npm
@@ -149,6 +165,8 @@ dotnet run
 ```
 
 Vid uppstart körs migrations och seed-data automatiskt mot databasen. API:et lyssnar som default på `http://localhost:5123` / `https://localhost:7229` (se `Properties/launchSettings.json`).
+
+> Kör `dotnet run` utan `--launch-profile` (default `http`-profilen), eller uttryckligen `dotnet run --launch-profile http`, och håll frontend på `http://localhost:5173` (Vites default). Blandar man HTTP och HTTPS mellan frontend/backend räknas det som olika "sites" i webbläsaren (schemeful same-site), och då skickas inte auth-cookien med trots `SameSite=Strict` — inget att fixa i kod, bara hålla samma scheme på båda sidor. Se alternativ A ovan om du vill slippa tänka på det.
 
 Standard-inloggning för adminkontot i utvecklingsläge sätts via `AdminUser`-konfigurationen i `appsettings.json` (byt ut i produktion via miljövariabler, se nedan).
 

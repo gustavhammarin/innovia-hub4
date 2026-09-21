@@ -1,16 +1,13 @@
-import { useState } from "react";
 import {
   PieChart,
   Pie,
-  Cell,
+  Sector,
   ResponsiveContainer,
   Legend,
   Tooltip,
+  type PieSectorShapeProps,
 } from "recharts";
-import {
-  useCurrentOccupancy,
-  useRangeOccupancy,
-} from "../../hooks/useOccupancy";
+import { useOccupancyView } from "../../hooks/useOccupancy";
 
 const COLORS = ["#3b82f6", "#8b5cf6", "#22c55e", "#ef4444", "#f59e0b"];
 
@@ -20,14 +17,7 @@ type Props = {
 };
 
 export function OccupancyWidget({ from, to }: Props) {
-  const [view, setView] = useState<"current" | "range">("current");
-
-  const currentQuery = useCurrentOccupancy();
-  const rangeQuery = useRangeOccupancy(from, to);
-
-  const data = view === "current" ? currentQuery.data : rangeQuery.data;
-  const isLoading =
-    view === "current" ? currentQuery.isLoading : rangeQuery.isLoading;
+  const { view, setView, data, isLoading } = useOccupancyView(from, to);
 
   const totalBooked =
     data?.byResourceType.reduce(
@@ -86,11 +76,10 @@ export function OccupancyWidget({ from, to }: Props) {
                     nameKey="name"
                     innerRadius={40}
                     outerRadius={65}
-                  >
-                    {chartData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
+                    shape={(props: PieSectorShapeProps) => (
+                      <Sector {...props} fill={COLORS[props.index % COLORS.length]} />
+                    )}
+                  />
                   <Tooltip />
                   <Legend
                     layout="vertical"

@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { buildMonthMatrix, dateToIso, shiftMonth } from "../lib/calendarGrid";
-
-const WEEKDAY_LABELS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
+import { dateToIso, shiftMonth } from "../lib/calendarGrid";
+import { MonthGrid } from "./MonthGrid";
 
 function formatDisplay(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("sv-SE", {
@@ -105,39 +104,15 @@ export function MobileDatePicker({
               </button>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-400 mb-1">
-              {WEEKDAY_LABELS.map((l) => (
-                <span key={l}>{l}</span>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-1">
-              {buildMonthMatrix(viewDate).map((cell) => {
-                const disabled =
-                  (!!minDate && cell.iso < minDate) || (!!maxDate && cell.iso > maxDate);
-                const selected = cell.iso === draft;
-                const isToday = cell.iso === today;
-                return (
-                  <button
-                    key={cell.iso}
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => setDraft(cell.iso)}
-                    className={`aspect-square min-h-11 rounded-md text-sm font-medium ${
-                      !cell.inMonth ? "text-gray-300 dark:text-gray-700" : "text-gray-700 dark:text-gray-300"
-                    } ${
-                      selected
-                        ? "bg-indigo-600 text-white"
-                        : disabled
-                          ? "cursor-not-allowed opacity-30"
-                          : "hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
-                    } ${isToday && !selected ? "ring-1 ring-inset ring-indigo-400" : ""}`}
-                  >
-                    {cell.dayNum}
-                  </button>
-                );
-              })}
-            </div>
+            <MonthGrid
+              viewMonth={viewYm}
+              selectedDate={draft}
+              minDate={minDate}
+              maxDate={maxDate}
+              cellMinHeight="min-h-11"
+              todayDate={today}
+              onSelectDate={setDraft}
+            />
 
             <div className="mt-4 flex gap-2">
               <button
