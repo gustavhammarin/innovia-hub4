@@ -104,8 +104,8 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<BookingHub>("/hubs/bookings");
-app.MapHub<ResourceHub>("/hubs/resources");
+app.MapHub<BookingHub>("/hubs/bookings").RequireAuthorization();
+app.MapHub<ResourceHub>("/hubs/resources").RequireAuthorization();
 
 app.MapAuthEndpoints();
 app.MapBookingsEndpoints();

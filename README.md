@@ -1,4 +1,215 @@
-# innovia-hub4
+# Innovia Hub
+
+Innovia Hub är ett bokningssystem för delade resurser (t.ex. mötesrum, skrivbord och annan utrustning) på ett kontor/coworking-hub. Systemet består av ett .NET-backend-API, en React-frontend och realtidsuppdateringar via SignalR, och körs i produktion som Docker-containrar bakom Caddy.
+
+## Innehåll
+
+- [Teknikstack](#teknikstack)
+- [Arkitektur och designval](#arkitektur-och-designval)
+- [Projektstruktur](#projektstruktur)
+- [Domänmodell](#domänmodell)
+- [Kom igång lokalt](#kom-igång-lokalt)
+- [Miljövariabler](#miljövariabler)
+- [Tester](#tester)
+- [CI/CD och deploy](#cicd-och-deploy)
+- [API-dokumentation (Scalar)](#api-dokumentation-scalar)
+- [Säkerhet](#säkerhet)
+
+## Teknikstack
+
+**Backend**
+- .NET 10 / ASP.NET Core Minimal API
+- Entity Framework Core + Npgsql (PostgreSQL)
+- ASP.NET Core Identity (användare, roller, lösenordshantering)
+- JWT-autentisering, förvarat i `HttpOnly`-cookies
+- SignalR för realtidsuppdateringar (bokningar och resursstatus)
+- Scalar för interaktiv OpenAPI-dokumentation
+
+**Frontend**
+- React 19 + TypeScript + Vite
+- React Router för routing
+- TanStack Query för server state/caching
+- Tailwind CSS för styling
+- @microsoft/signalr för realtidsanslutning mot backend
+- Recharts för diagram (t.ex. beläggning/occupancy)
+
+**Infrastruktur**
+- PostgreSQL 17 i Docker
+- Caddy som reverse proxy + automatisk HTTPS i produktion
+- Docker Compose för lokal utveckling och produktion
+- GitHub Actions för CI (build/test/lint) och CD (bygg + push till GHCR + deploy via SSH)
+
+## Arkitektur och designval
+
+### Backend: Vertical Slice Architecture
+
+Backend är byggt som **vertical slices** (feature folders) istället för traditionella lager (Controllers/Services/Repositories rakt igenom). Varje funktion ligger i sin egen mapp under `Innovia.Api/Features/`, t.ex. `Features/Bookings/CreateBooking/`, och innehåller allt som hör till just den use-caset:
+
+- `*.Endpoint.cs` – definierar route, kopplar HTTP-request till handler, mappar `Result` till HTTP-svar
+- `*.Command.cs` / `*.Request.cs` – indata till use-caset
+- `*.Handler.cs` – själva affärslogiken
+- `*.Validator.cs` – validering av indata
+- `*.Response.cs` – DTO som skickas tillbaka (aldrig entiteter direkt)
+
+Varje feature-mapp har en `*ServiceExtensions.cs` (t.ex. `BookingServiceExtensions.cs`) som registrerar DI och mappar endpoints (`MapBookingsEndpoints()`), och dessa anropas samlat från `Program.cs`. Detta gör att auktorisering (`RequireAuthorization`, roll-policys) är samlad och synlig på ett ställe per feature, istället för utspridd i enskilda filer.
+
+**Varför:** Vertical slices minskar kopplingen mellan orelaterade funktioner (att ändra bokningslogik rör inte resurslogik) och gör det lätt att hitta all kod som hör till en viss funktion, på bekostnad av viss duplicering mellan slices.
+
+### Result-pattern istället för exceptions
+
+Handlers returnerar `Result` / `Result<T>` (se `Common/Result/`) istället för att kasta exceptions för förväntade felfall (t.ex. "bokning finns inte", "resurs redan bokad"). `ToHttpResponse()` mappar sedan resultatet till rätt HTTP-status/`ProblemDetails`. Detta ger explicit, förutsägbar felhantering och undviker att använda exceptions för kontrollflöde.
+
+### Autentisering och auktorisering
+
+- Inloggning sker mot ASP.NET Core Identity (`UserManager`/`SignInManager`), med lösenordslåsning (lockout) vid upprepade felaktiga inloggningsförsök.
+- Vid lyckad inloggning utfärdas en **JWT access token** (kort livslängd, default 90 min) och en **refresh token** (roterande, hash:as vid lagring, default 1 dag). Båda skickas som separata `HttpOnly`-cookies, inte i JSON-svaret – detta skyddar mot att tokens läses av JavaScript (XSS).
+- Cookies sätts med `SameSite=Strict` och `Secure` (i produktion), vilket skyddar mot CSRF utan att behöva separata CSRF-tokens.
+- Refresh tokens roteras vid varje användning; om en redan använd/återkallad refresh token återanvänds så återkallas hela tokenfamiljen (skydd mot replay-attacker om en token skulle läcka).
+- Auktorisering styrs via policys (`AdminOnly`, `MemberOnly`, `MemberOrAdmin`, se `Common/Auth/AuthorizationPolicies.cs`) och en **fallback-policy som kräver autentisering** på alla endpoints som inte uttryckligen är anonyma. Admin-only-anrop kontrolleras dessutom explicit i handlers där en admin kan agera å en annan användares vägnar (t.ex. skapa bokning åt någon annan).
+- SignalR-hubbarna (`/hubs/bookings`, `/hubs/resources`) kräver också autentisering, med extra admin-policy på de metoder som strömmar all bokningsdata.
+
+### Realtid (SignalR)
+
+Två hubbar sänder ut händelser till klienter som prenumererar:
+- `BookingHub` – bokningar skapas/uppdateras/avbokas, samt en admin-grupp som får alla bokningshändelser.
+- `ResourceHub` – ändringar i resursstatus (t.ex. offline/underhåll).
+
+Frontend ansluter till dessa via `@microsoft/signalr` (se `frontend/src/lib/bookingHubConnection.ts` och `resourceHubConnection.ts`) för att slippa pollning.
+
+### Frontend
+
+- **React Router** delar upp gränssnittet i member- och admin-sidor (`src/pages/member`, `src/pages/admin`), med `ProtectedRoute` som skyddar routes baserat på inloggnings-/rollstatus.
+- **TanStack Query** hanterar all server state (hämtning, cache, refetch, mutationer) mot API:et istället för manuell `useState`/`useEffect`-hantering av data.
+- **API-klienten** (`src/api/client.ts`) gör alla anrop med `credentials: "include"` så att autentiseringscookies alltid skickas med, utan att JS behöver hantera tokens direkt.
+- Tailwind CSS används för styling utan separat komponentbibliotek.
+
+### Datalager
+
+- EF Core mot PostgreSQL, med migrations incheckade i `Innovia.Api/Migrations/`.
+- Migrations körs automatiskt vid uppstart (`ApplyMigrationsAsync`), och grunddata (t.ex. admin-användare, roller) seedas via `SeedAppDataAsync`.
+- Databasnivå-constraints används för overlap-skydd på bokningar (en resurs kan inte dubbelbokas för samma tidsintervall), inte bara applikationslogik.
+
+## Projektstruktur
+
+```
+innovia-hub4/
+├── Innovia.Api/                 # Backend (.NET 10 minimal API)
+│   ├── Common/                  # Delad infrastruktur (Auth, Database, Result, Errors, ...)
+│   ├── Features/                # Vertical slices – en mapp per use-case
+│   ├── Migrations/              # EF Core-migrations
+│   └── Program.cs               # Composition root
+├── frontend/                    # Frontend (React + Vite + TS)
+│   └── src/
+│       ├── api/                 # HTTP-klient mot backend
+│       ├── auth/                # Auth-context/hooks
+│       ├── components/          # Delade UI-komponenter
+│       ├── hooks/                
+│       ├── lib/                 # SignalR-anslutningar m.m.
+│       └── pages/                # member/ och admin/ sidor
+├── tests/
+│   └── Innovia.Api.Tests/       # xUnit-tester (inkl. Testcontainers mot Postgres)
+├── docker-compose.yaml          # Lokal utveckling (endast Postgres)
+├── docker-compose.prod.yaml     # Produktion (api, frontend, postgres, caddy)
+├── Caddyfile                    # Reverse proxy-konfiguration
+└── .github/workflows/           # CI och deploy-pipelines
+```
+
+## Domänmodell
+
+Kärnentiteterna (`Innovia.Api/Common/Database/Entities/`):
+
+- **ApplicationUser / ApplicationRole** – användare och roller (bygger på ASP.NET Identity)
+- **Resource** – en bokningsbar resurs (t.ex. ett rum eller en enhet), har en status (online/offline/underhåll)
+- **ResourceType** – kategori av resurser, styr bl.a. bokningsregler
+- **AvailabilityRule** – regler för när en resurstyp/resurs är bokningsbar
+- **Booking** – en bokning kopplad till en användare och en resurs, med tidsintervall och status
+- **RefreshToken** – roterande refresh-tokens kopplade till en användare
+
+## Kom igång lokalt
+
+### Förutsättningar
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/)
+- [Node.js 22](https://nodejs.org/) + npm
+- Docker (för PostgreSQL)
+
+### 1. Starta databasen
+
+```bash
+docker compose up -d
+```
+
+Detta startar en lokal PostgreSQL-instans (`innovia_db`) på port `5432`, konfigurerad enligt `docker-compose.yaml`.
+
+### 2. Starta backend
+
+```bash
+cd Innovia.Api
+dotnet run
+```
+
+Vid uppstart körs migrations och seed-data automatiskt mot databasen. API:et lyssnar som default på `http://localhost:5123` / `https://localhost:7229` (se `Properties/launchSettings.json`).
+
+Standard-inloggning för adminkontot i utvecklingsläge sätts via `AdminUser`-konfigurationen i `appsettings.json` (byt ut i produktion via miljövariabler, se nedan).
+
+### 3. Starta frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend startar via Vite (default `http://localhost:5173`) och pratar med backend via `VITE_API_URL` (se `.env`/`example.env`).
+
+### 4. Öppna appen
+
+Gå till frontend-adressen i webbläsaren, logga in med admin-kontot eller registrera en ny medlem.
+
+## Miljövariabler
+
+Se `example.env` för samtliga variabler som behövs för produktion/Docker Compose:
+
+| Variabel | Beskrivning |
+|---|---|
+| `APP_DOMAIN` / `API_DOMAIN` | Domäner som Caddy terminerar TLS för och proxar vidare till frontend/api |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Databasuppgifter |
+| `JWT_ISSUER` / `JWT_AUDIENCE` / `JWT_SECRET` | JWT-konfiguration (secret måste vara lång/slumpad i produktion) |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Uppgifter för det seedade admin-kontot |
+| `FRONTEND_ORIGIN` | Tillåten CORS-origin för API:et |
+| `VITE_API_URL` | URL frontend bygger mot (bakas in i frontend-bygget) |
+
+Lokalt under utveckling styrs backend istället av `Innovia.Api/appsettings.json` / `appsettings.Development.json`.
+
+## Tester
+
+Backend-tester ligger i `tests/Innovia.Api.Tests` och använder xUnit, `Microsoft.AspNetCore.Mvc.Testing` (in-memory test-server) samt **Testcontainers** för att köra tester mot en riktig PostgreSQL-instans i container (inte in-memory-databas), vilket ger mer verklighetstrogna tester av bl.a. EF Core-queries och databas-constraints.
+
+```bash
+dotnet test tests/Innovia.Api.Tests/Innovia.Api.Tests.csproj
+```
+
+Kräver att Docker körs lokalt (för Testcontainers).
+
+Frontend har lint via `oxlint`:
+
+```bash
+cd frontend
+npm run lint
+```
+
+## CI/CD och deploy
+
+**CI** (`.github/workflows/ci.yaml`) körs på push/PR mot `main` och `dev`:
+- Backend: restore, build och `dotnet test` mot hela lösningen (`Innovia.slnx`)
+- Frontend: `npm ci`, lint och build
+
+**Deploy** (`.github/workflows/deploy.yaml`) körs på push till `main`:
+1. Bygger och pushar Docker-images för API och frontend till GitHub Container Registry (GHCR), taggade med både `latest` och commit-SHA.
+2. Kopierar `docker-compose.prod.yaml` och `Caddyfile` till produktionsservern via SCP.
+3. SSH:ar in på servern, drar nya images (`IMAGE_TAG` = commit-SHA) och kör `docker compose up -d` för att rulla ut ny version, samt städar bort gamla images.
+
+I produktion körs fyra containrar bakom varandra: **Caddy** (TLS-terminering + reverse proxy) → **frontend** (statisk build serverad av Caddy i sin egen container) och **api** (ASP.NET Core), samt **postgres** som delad databas. `api` och `postgres` ligger på ett internt Docker-nätverk som inte är exponerat utåt; endast Caddy publicerar portar (80/443).
 
 ## API-dokumentation (Scalar)
 
@@ -11,3 +222,13 @@ Projektet använder [Scalar](https://scalar.com/) för att visa och testa API:et
    - `https://localhost:7229/scalar/v1`
 4. I gränssnittet kan du bläddra bland alla endpoints, se request/response-scheman och skicka testanrop direkt.
 
+## Säkerhet
+
+Kort sammanfattning av de säkerhetsval som gjorts (se även koden i `Common/Auth/`):
+
+- Access- och refresh-tokens lagras aldrig i `localStorage`/JS-läsbar cookie, utan endast som `HttpOnly`-cookies → skyddar mot att XSS kan stjäla tokens.
+- Cookies sätts med `SameSite=Strict` + `Secure` i produktion → skyddar mot CSRF utan separata CSRF-tokens.
+- Refresh tokens hashas i databasen och roteras vid varje refresh; återanvändning av en redan roterad/återkallad token triggar återkallning av hela tokenfamiljen.
+- Inloggning går via `SignInManager` med kontolåsning (lockout) vid upprepade felförsök, inte bara ren lösenordskontroll.
+- All auktorisering går via en global fallback-policy som kräver autentisering, med explicita roll-policys (`AdminOnly` m.fl.) där striktare krav behövs — inklusive på SignalR-hubbarna.
+- Alla databasfrågor går via EF Core/LINQ (parametriserat), ingen rå SQL byggs av användarindata.
