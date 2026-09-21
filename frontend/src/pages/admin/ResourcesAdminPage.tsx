@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { StatusBadge } from "../../components/StatusBadge";
 import { ResourceTypeFilter } from "../../components/ResourceTypeFilter";
 import { ApiError } from "../../api/client";
@@ -35,6 +36,8 @@ function MenuItem({
   );
 }
 
+const MENU_WIDTH = 176; // px, matches w-44
+
 function ResourceActions({
   resource,
   onBook,
@@ -49,16 +52,57 @@ function ResourceActions({
   align?: "left" | "right";
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{
+    left: number;
+    top?: number;
+    bottom?: number;
+    maxHeight: number;
+  } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
+
     function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (
+        buttonRef.current && !buttonRef.current.contains(target) &&
+        menuRef.current && !menuRef.current.contains(target)
+      ) {
+        setOpen(false);
+      }
     }
+    function onScrollOrResize() {
+      setOpen(false);
+    }
+
     document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
   }, [open]);
+
+  function toggle() {
+    if (!open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      const left = align === "right" ? rect.right - MENU_WIDTH : rect.left;
+      const openUpward = spaceBelow < 240 && spaceAbove > spaceBelow;
+
+      setPosition(
+        openUpward
+          ? { left, bottom: window.innerHeight - rect.top + 4, maxHeight: spaceAbove - 8 }
+          : { left, top: rect.bottom + 4, maxHeight: spaceBelow - 8 }
+      );
+    }
+    setOpen((v) => !v);
+  }
 
   function run(fn: () => void) {
     fn();
@@ -66,60 +110,70 @@ function ResourceActions({
   }
 
   return (
-    <div ref={ref} className="relative inline-block text-left">
+    <>
       <button
-        onClick={() => setOpen((v) => !v)}
+        ref={buttonRef}
+        onClick={toggle}
         aria-expanded={open}
         className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
       >
         Hantera ▾
       </button>
-      {open && (
-        <div
-          className={`absolute z-10 mt-1 w-44 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg py-1 ${
-            align === "right" ? "right-0" : "left-0"
-          }`}
-        >
-          <MenuItem
-            onClick={() => run(onBook)}
-            className={
-              resource.status !== "Online"
-                ? "text-gray-300 dark:text-gray-600 cursor-not-allowed pointer-events-none"
-                : "text-indigo-600 dark:text-indigo-400"
-            }
+      {open && position &&
+        createPortal(
+          <div
+            ref={menuRef}
+            style={{
+              top: position.top,
+              bottom: position.bottom,
+              left: position.left,
+              width: MENU_WIDTH,
+              maxHeight: position.maxHeight,
+              overflowY: "auto",
+            }}
+            className="fixed z-50 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg py-1"
           >
-            Boka
-          </MenuItem>
-          <MenuItem onClick={() => run(onEdit)} className="text-indigo-600 dark:text-indigo-400">
-            Redigera
-          </MenuItem>
-          {resource.status !== "Online" && resource.status !== "Archived" && (
-            <MenuItem onClick={() => run(() => onAction("online"))} className="text-green-600 dark:text-green-400">
-              Online
+            <MenuItem
+              onClick={() => run(onBook)}
+              className={
+                resource.status !== "Online"
+                  ? "text-gray-300 dark:text-gray-600 cursor-not-allowed pointer-events-none"
+                  : "text-indigo-600 dark:text-indigo-400"
+              }
+            >
+              Boka
             </MenuItem>
-          )}
-          {resource.status !== "Maintenance" && resource.status !== "Archived" && (
-            <MenuItem onClick={() => run(() => onAction("maintenance"))} className="text-amber-600 dark:text-amber-400">
-              Underhåll
+            <MenuItem onClick={() => run(onEdit)} className="text-indigo-600 dark:text-indigo-400">
+              Redigera
             </MenuItem>
-          )}
-          {resource.status !== "Offline" && resource.status !== "Archived" && (
-            <MenuItem onClick={() => run(() => onAction("offline"))} className="text-gray-500 dark:text-gray-400">
-              Offline
-            </MenuItem>
-          )}
-          {resource.status === "Archived" ? (
-            <MenuItem onClick={() => run(() => onAction("unarchive"))} className="text-indigo-600 dark:text-indigo-400">
-              Återställ
-            </MenuItem>
-          ) : (
-            <MenuItem onClick={() => run(() => onAction("archive"))} className="text-red-600 dark:text-red-400">
-              Arkivera
-            </MenuItem>
-          )}
-        </div>
-      )}
-    </div>
+            {resource.status !== "Online" && resource.status !== "Archived" && (
+              <MenuItem onClick={() => run(() => onAction("online"))} className="text-green-600 dark:text-green-400">
+                Online
+              </MenuItem>
+            )}
+            {resource.status !== "Maintenance" && resource.status !== "Archived" && (
+              <MenuItem onClick={() => run(() => onAction("maintenance"))} className="text-amber-600 dark:text-amber-400">
+                Underhåll
+              </MenuItem>
+            )}
+            {resource.status !== "Offline" && resource.status !== "Archived" && (
+              <MenuItem onClick={() => run(() => onAction("offline"))} className="text-gray-500 dark:text-gray-400">
+                Offline
+              </MenuItem>
+            )}
+            {resource.status === "Archived" ? (
+              <MenuItem onClick={() => run(() => onAction("unarchive"))} className="text-indigo-600 dark:text-indigo-400">
+                Återställ
+              </MenuItem>
+            ) : (
+              <MenuItem onClick={() => run(() => onAction("archive"))} className="text-red-600 dark:text-red-400">
+                Arkivera
+              </MenuItem>
+            )}
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
 
@@ -159,7 +213,7 @@ export function ResourcesAdminPage() {
       <div className="sticky top-14 z-10 -mx-4 px-4 bg-gray-50 dark:bg-gray-950 pt-4 pb-3 mb-1">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Resurser (admin)
+            Resurser
           </h1>
           <button
             onClick={() => setCreating(true)}

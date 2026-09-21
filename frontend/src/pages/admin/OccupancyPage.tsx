@@ -2,16 +2,14 @@ import { useState } from "react";
 import {
   BarChart,
   Bar,
+  Rectangle,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Cell,
+  type BarShapeProps,
 } from "recharts";
-import {
-  useCurrentOccupancy,
-  useRangeOccupancy,
-} from "../../hooks/useOccupancy";
+import { useOccupancyView } from "../../hooks/useOccupancy";
 import { useAdminBookingUpdates } from "../../hooks/useAdminBookingsUpdates";
 import { useResourceStatusUpdates } from "../../hooks/useResourceStatusUpdates";
 import { MobileDatePicker } from "../../components/MobileDatePicker";
@@ -46,16 +44,10 @@ export function OccupancyPage() {
   useAdminBookingUpdates();
   useResourceStatusUpdates();
 
-  const [view, setView] = useState<"current" | "range">("current");
   const [from, setFrom] = useState(new Date().toISOString().split("T")[0]);
   const [to, setTo] = useState(new Date().toISOString().split("T")[0]);
 
-  const currentQuery = useCurrentOccupancy();
-  const rangeQuery = useRangeOccupancy(from, to);
-
-  const data = view === "current" ? currentQuery.data : rangeQuery.data;
-  const isLoading =
-    view === "current" ? currentQuery.isLoading : rangeQuery.isLoading;
+  const { view, setView, data, isLoading } = useOccupancyView(from, to);
 
   const chartData =
     data?.byResourceType.map((rt) => ({
@@ -125,11 +117,10 @@ export function OccupancyPage() {
                   dataKey="percentage"
                   radius={[4, 4, 0, 0]}
                   background={{ fill: "#1f2937" }}
-                >
-                  {chartData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Bar>
+                  shape={(props: BarShapeProps) => (
+                    <Rectangle {...props} fill={COLORS[props.index % COLORS.length]} />
+                  )}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
