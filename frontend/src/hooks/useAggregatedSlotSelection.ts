@@ -95,6 +95,11 @@ export function useAggregatedSlotSelection(slots: AggregatedSlot[], maxDurationM
     setSelection(fullDayRange);
   }
 
+  // "Full day" only counts if the free block covers every slot of the day —
+  // a short free stretch that happens to start at slot 0 doesn't qualify.
+  const isFullDayAvailable =
+    !!fullDayRange && fullDayRange.startIndex === 0 && fullDayRange.endIndex === slots.length - 1;
+
   const isFullDaySelected =
     !!selection &&
     !!fullDayRange &&
@@ -122,6 +127,6 @@ export function useAggregatedSlotSelection(slots: AggregatedSlot[], maxDurationM
     availableResourceIds,
     selectFullDay,
     isFullDaySelected,
-    hasFullDayOption: fullDayRange !== null,
+    hasFullDayOption: isFullDayAvailable,
   };
 }

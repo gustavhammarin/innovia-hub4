@@ -14,6 +14,9 @@ export function useResourcesAvailability(resourceIds: string[], from: string, to
   const byResourceId = new Map<string, AvailabilitySlot[]>(
     resourceIds.map((id, i) => [id, results[i].data?.slots ?? []])
   );
+  const closedForRestOfTodayByResourceId = new Map<string, boolean>(
+    resourceIds.map((id, i) => [id, results[i].data?.closedForRestOfToday ?? false])
+  );
 
-  return { isLoading, byResourceId };
+  return { isLoading, byResourceId, closedForRestOfTodayByResourceId };
 }

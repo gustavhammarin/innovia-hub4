@@ -2,7 +2,8 @@ namespace Innovia.Api.Features.Availability.GetResourceAvailability;
 
 public sealed record Response(
     Guid ResourceId,
-    IReadOnlyList<SlotResponse> Slots
+    IReadOnlyList<SlotResponse> Slots,
+    bool ClosedForRestOfToday
 );
 
 public sealed record SlotResponse(
