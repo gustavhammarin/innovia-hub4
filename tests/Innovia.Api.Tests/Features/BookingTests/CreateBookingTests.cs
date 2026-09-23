@@ -1,5 +1,6 @@
 using Innovia.Api.Common.Database;
 using Innovia.Api.Common.Database.Entities;
+using Innovia.Api.Common.Time;
 using Innovia.Api.Features.Bookings;
 using Innovia.Api.Features.Bookings.CreateBooking;
 
@@ -74,6 +75,12 @@ public class CreateBookingTests
     private static Handler CreateHandler(AppDbContext context) =>
         new(context, new BookingRulesService(context), new NoopBookingNotifier());
 
+    // Anchors bookings to 10:00 tomorrow (Sweden time) instead of "now + N hours" so tests
+    // never flake by crossing midnight into a closed day when run in the evening.
+    private static DateTimeOffset AnchorTime(int hourOffset = 0) =>
+        SwedenTimeZone.ToUtc(DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1), new TimeOnly(10, 0))
+            .AddHours(hourOffset);
+
     [Fact]
     public async Task Should_Succeed_When_Booking_Valid_Time_On_Resource()
     {
@@ -81,7 +88,7 @@ public class CreateBookingTests
         var (userId, resourceId) = await SeedUserAndResourceAsync(context);
         var handler = CreateHandler(context);
 
-        var startsAt = DateTimeOffset.UtcNow.AddHours(1);
+        var startsAt = AnchorTime(1);
         var command = new Command(resourceId, userId, startsAt, startsAt.AddHours(1));
 
         var result = await handler.HandleAsync(command, CancellationToken.None);
@@ -99,7 +106,7 @@ public class CreateBookingTests
         var (userId, resourceId) = await SeedUserAndResourceAsync(context);
         var handler = CreateHandler(context);
 
-        var startsAt = DateTimeOffset.UtcNow.AddHours(2);
+        var startsAt = AnchorTime(2);
         var existing = new Command(resourceId, userId, startsAt, startsAt.AddHours(1));
         var existingResult = await handler.HandleAsync(existing, CancellationToken.None);
         Assert.True(existingResult.IsSuccess);
@@ -118,7 +125,7 @@ public class CreateBookingTests
         var (userId, resourceId) = await SeedUserAndResourceAsync(context);
         var handler = CreateHandler(context);
 
-        var startsAt = DateTimeOffset.UtcNow.AddHours(3);
+        var startsAt = AnchorTime(3);
         var first = new Command(resourceId, userId, startsAt, startsAt.AddHours(1));
         var firstResult = await handler.HandleAsync(first, CancellationToken.None);
         Assert.True(firstResult.IsSuccess);
@@ -137,7 +144,7 @@ public class CreateBookingTests
         var (_, resourceId2) = await SeedUserAndResourceAsync(context);
         var handler = CreateHandler(context);
 
-        var startsAt = DateTimeOffset.UtcNow.AddHours(4);
+        var startsAt = AnchorTime(4);
         var first = new Command(resourceId1, userId, startsAt, startsAt.AddHours(1));
         var firstResult = await handler.HandleAsync(first, CancellationToken.None);
         Assert.True(firstResult.IsSuccess);
@@ -164,7 +171,7 @@ public class CreateBookingTests
         await context.SaveChangesAsync();
 
         var handler = CreateHandler(context);
-        var startsAt = DateTimeOffset.UtcNow.AddHours(5);
+        var startsAt = AnchorTime(5);
         var command = new Command(Guid.CreateVersion7(), user.Id, startsAt, startsAt.AddHours(1));
 
         var result = await handler.HandleAsync(command, CancellationToken.None);
