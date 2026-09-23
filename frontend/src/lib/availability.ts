@@ -56,12 +56,17 @@ export function datesWithAvailability(
 // resource has at least one free slot left today instead.
 export function todayAvailabilitySummary(
   resourceIds: string[],
-  byResourceId: Map<string, AvailabilitySlot[]>
-): { availableCount: number; totalCount: number } {
+  byResourceId: Map<string, AvailabilitySlot[]>,
+  closedForRestOfTodayByResourceId: Map<string, boolean>
+): { availableCount: number; totalCount: number; closedForRestOfToday: boolean } {
   let availableCount = 0;
   for (const resourceId of resourceIds) {
     const slots = byResourceId.get(resourceId) ?? [];
     if (slots.some((s) => s.isAvailable)) availableCount += 1;
   }
-  return { availableCount, totalCount: resourceIds.length };
+  // Same rules apply to every resource of a type, so they always agree on this.
+  const closedForRestOfToday =
+    resourceIds.length > 0 &&
+    resourceIds.every((id) => closedForRestOfTodayByResourceId.get(id) ?? false);
+  return { availableCount, totalCount: resourceIds.length, closedForRestOfToday };
 }

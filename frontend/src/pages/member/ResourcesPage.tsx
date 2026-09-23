@@ -32,11 +32,11 @@ export function ResourcesPage() {
 
   const today = todayIso();
   const onlineResourceIds = resources.filter((r) => r.status === "Online").map((r) => r.id);
-  const { byResourceId, isLoading: availabilityLoading } = useResourcesAvailability(
-    onlineResourceIds,
-    today,
-    today
-  );
+  const {
+    byResourceId,
+    closedForRestOfTodayByResourceId,
+    isLoading: availabilityLoading,
+  } = useResourcesAvailability(onlineResourceIds, today, today);
   useResourcesBookingUpdates(onlineResourceIds);
 
   const loading = resourcesQuery.isLoading || typesQuery.isLoading;
@@ -54,9 +54,10 @@ export function ResourcesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {types.map((type) => {
           const typeResources = resourcesByType.get(type.id) ?? [];
-          const { availableCount, totalCount } = todayAvailabilitySummary(
+          const { availableCount, totalCount, closedForRestOfToday } = todayAvailabilitySummary(
             typeResources.map((r) => r.id),
-            byResourceId
+            byResourceId,
+            closedForRestOfTodayByResourceId
           );
           const offlineCount = resources.filter(
             (r) => r.resourceTypeId === type.id && r.status !== "Online"
@@ -83,7 +84,9 @@ export function ResourcesPage() {
               {bookable && !availabilityLoading && (
                 <>
                   {availableCount === 0 ? (
-                    <p className="text-sm text-gray-400">Fullbokat idag</p>
+                    <p className="text-sm text-gray-400">
+                      {closedForRestOfToday ? "Stängt för idag" : "Fullbokat idag"}
+                    </p>
                   ) : (
                     <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                       {availableCount}

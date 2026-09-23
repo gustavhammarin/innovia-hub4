@@ -52,8 +52,16 @@ public sealed class Handler
             }
         }
 
+        // Distinguishes "closed for the rest of today" (no rule for today, or already past
+        // closing time) from "actually fully booked" — both otherwise look like an empty
+        // slot list to the caller.
+        var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTimeOffset.UtcNow.UtcDateTime, SwedenTimeZone.Instance);
+        var todayLocal = DateOnly.FromDateTime(nowLocal);
+        var closedForRestOfToday = !rules.TryGetValue(todayLocal.DayOfWeek, out var todayRule)
+            || TimeOnly.FromDateTime(nowLocal) >= todayRule.ClosesAt;
+
         if (slotCandidates.Count == 0)
-            return Result<Response>.Ok(new Response(resource.Id, []));
+            return Result<Response>.Ok(new Response(resource.Id, [], closedForRestOfToday));
 
         var startsAt = slotCandidates.Min(slot => slot.StartUtc);
         var endsAt = slotCandidates.Max(slot => slot.EndUtc);
@@ -78,6 +86,6 @@ public sealed class Handler
                     && booking.EndsAt > slot.StartUtc)))
             .ToList();
 
-        return Result<Response>.Ok(new Response(resource.Id, slots));
+        return Result<Response>.Ok(new Response(resource.Id, slots, closedForRestOfToday));
     }
 }

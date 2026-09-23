@@ -66,8 +66,16 @@ export function BookingFlowModal({
   const [targetUser, setTargetUser] = useState<AppUser | null>(null);
 
   const resourceIds = resources.map((r) => r.id);
-  const { byResourceId, isLoading } = useResourcesAvailability(resourceIds, date, date);
+  const { byResourceId, closedForRestOfTodayByResourceId, isLoading } = useResourcesAvailability(
+    resourceIds,
+    date,
+    date
+  );
   const slots = aggregateSlotsAcrossResources(resourceIds, byResourceId);
+  const closedForRestOfToday =
+    isToday &&
+    resourceIds.length > 0 &&
+    resourceIds.every((id) => closedForRestOfTodayByResourceId.get(id) ?? false);
 
   const {
     toggleSlot,
@@ -209,7 +217,11 @@ export function BookingFlowModal({
           {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
 
           {!isLoading && slots.length === 0 && (
-            <p className="text-sm text-gray-500">Inga lediga tider denna dag.</p>
+            <p className="text-sm text-gray-500">
+              {closedForRestOfToday
+                ? "Stängt för resten av idag. Prova ett annat datum."
+                : "Inga lediga tider denna dag."}
+            </p>
           )}
 
           {!isLoading && hasFullDayOption && (

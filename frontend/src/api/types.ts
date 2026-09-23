@@ -67,6 +67,7 @@ export interface AvailabilitySlot {
 export interface AvailabilityResponse {
   resourceId: string;
   slots: AvailabilitySlot[];
+  closedForRestOfToday: boolean;
 }
 
 export type CurrentOccupancy = {
